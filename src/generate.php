@@ -213,4 +213,8 @@ class generate {
 	public function getOperaVersions() {
 
 	}
+
+	public function getBraveVersions() {
+		$url = 'https://versions.brave.com/latest/brave-versions.json';
+	}
 }
