@@ -1,0 +1,246 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "de4bba9adc257026b61392b38cf62d5f",
+    "packages": [
+        {
+            "name": "hexydec/cssdoc",
+            "version": "1.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hexydec/cssdoc.git",
+                "reference": "7e06e7dabb807f2591213f54ab4af00b5f713cb2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/7e06e7dabb807f2591213f54ab4af00b5f713cb2",
+                "reference": "7e06e7dabb807f2591213f54ab4af00b5f713cb2",
+                "shasum": ""
+            },
+            "require": {
+                "hexydec/tokenise": "1.0.2",
+                "php": ">=8.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Will Earp",
+                    "email": "will@hexydec.com",
+                    "homepage": "https://github.com/hexydec"
+                }
+            ],
+            "description": "A token based CSS Document parser and minifier written in PHP",
+            "homepage": "https://github.com/hexydec/cssdoc",
+            "keywords": [
+                "compiler",
+                "css",
+                "minifier",
+                "minify",
+                "parser",
+                "stylesheet"
+            ],
+            "support": {
+                "issues": "https://github.com/hexydec/cssdoc/issues",
+                "source": "https://github.com/hexydec/cssdoc/tree/1.2.1"
+            },
+            "time": "2024-12-25T00:20:31+00:00"
+        },
+        {
+            "name": "hexydec/htmldoc",
+            "version": "1.8.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hexydec/htmldoc.git",
+                "reference": "62d196543ee28bd09e114eb5204463137f4191ff"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hexydec/htmldoc/zipball/62d196543ee28bd09e114eb5204463137f4191ff",
+                "reference": "62d196543ee28bd09e114eb5204463137f4191ff",
+                "shasum": ""
+            },
+            "require": {
+                "hexydec/cssdoc": "1.2.1",
+                "hexydec/jslite": "1.0.5",
+                "hexydec/tokenise": "1.0.2",
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "10.1.2"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Will Earp",
+                    "email": "will@hexydec.com",
+                    "homepage": "https://github.com/hexydec"
+                }
+            ],
+            "description": "A token based HTML document parser and minifier. Minify HTML documents including inline CSS, Javascript, and SVG's on the fly. Extract document text, attributes, and fragments. Full test suite.",
+            "homepage": "https://github.com/hexydec/htmldoc",
+            "keywords": [
+                "compiler",
+                "css",
+                "dom",
+                "html",
+                "javascript",
+                "minifier",
+                "minify",
+                "parser",
+                "simplehtmldom",
+                "svg",
+                "xml"
+            ],
+            "support": {
+                "issues": "https://github.com/hexydec/htmldoc/issues",
+                "source": "https://github.com/hexydec/htmldoc/tree/1.8.6"
+            },
+            "time": "2024-12-25T15:03:57+00:00"
+        },
+        {
+            "name": "hexydec/jslite",
+            "version": "1.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hexydec/jslite.git",
+                "reference": "b7a03c9cc7a3092edfa1050a9d2424167002cf60"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/b7a03c9cc7a3092edfa1050a9d2424167002cf60",
+                "reference": "b7a03c9cc7a3092edfa1050a9d2424167002cf60",
+                "shasum": ""
+            },
+            "require": {
+                "hexydec/tokenise": "1.0.2",
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Will Earp",
+                    "email": "will@hexydec.com",
+                    "homepage": "https://github.com/hexydec"
+                }
+            ],
+            "description": "A token based Javascript parser/minifier designed for compressing inline scripts on the fly, written in PHP",
+            "homepage": "https://github.com/hexydec/jslite",
+            "keywords": [
+                "JS",
+                "compiler",
+                "javascript",
+                "minifier",
+                "minify",
+                "parser"
+            ],
+            "support": {
+                "issues": "https://github.com/hexydec/jslite/issues",
+                "source": "https://github.com/hexydec/jslite/tree/1.0.5"
+            },
+            "time": "2024-12-25T11:47:34+00:00"
+        },
+        {
+            "name": "hexydec/tokenise",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hexydec/tokenise.git",
+                "reference": "8ff0288d9edcf44292477ebccb9062aec8be24e5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/8ff0288d9edcf44292477ebccb9062aec8be24e5",
+                "reference": "8ff0288d9edcf44292477ebccb9062aec8be24e5",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.12",
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Will Earp",
+                    "email": "will@hexydec.com",
+                    "homepage": "https://github.com/hexydec"
+                }
+            ],
+            "description": "A program for performing lexical analysis, written in PHP",
+            "homepage": "https://github.com/hexydec/tokenise",
+            "keywords": [
+                "lexical",
+                "lexing",
+                "parser",
+                "tokenisation",
+                "tokeniser",
+                "tokenization",
+                "tokenizer"
+            ],
+            "support": {
+                "issues": "https://github.com/hexydec/tokenise/issues",
+                "source": "https://github.com/hexydec/tokenise/tree/1.0.2"
+            },
+            "time": "2024-09-17T19:42:17+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "beta",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.2.0"
+}
