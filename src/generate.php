@@ -97,9 +97,7 @@ class generate {
 		$url = 'https://chromiumdash.appspot.com/fetch_releases?channel=Stable&platform=Windows&num='.$items.'&offset=';
 		$chrome = [];
 		for ($i = 0; $i < 10; $i++) {
-			echo 'Fetching "'.$url.($i * $items).'"'."\n";
 			if (($data = $this->getFromJson($url.($i * $items), ['version'], ['time'], $cache)) !== false) {
-				echo 'Found '.\count($data).' Chrome versions'."\n";
 				$chrome = \array_merge($chrome, \array_map(fn (int $time) => \date('Y-m-d', $time), $data));
 				if (\count($data) < $items) {
 					return $chrome;
@@ -116,7 +114,6 @@ class generate {
 	public function getFirefoxVersions(?string $cache = null) : array|false {
 		$url = 'https://whattrainisitnow.com/calendar/';
 		if (($html = $this->fetch($url, $cache)) !== false) {
-			echo 'Fetching "'.$url.'"'."\n";
 			$data = [];
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($html)) {
@@ -128,10 +125,92 @@ class generate {
 						}
 					}
 				}
-				echo 'Found '.\count($data).' Firefox versions'."\n";
 				return $data;
 			}
 		}
 		return false;
+	}
+
+	public function getEdgeVersions(?string $cache = null) : array|false {
+		$url = 'https://learn.microsoft.com/en-us/deployedge/microsoft-edge-release-schedule';
+		if (($html = $this->fetch($url, $cache)) !== false) {
+			$data = [];
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				foreach ($obj->find('table > tbody > tr') AS $row) {
+					if (\preg_match('/([0-9]{2}-[a-z]{3}-[0-9]{4})\W++([0-9.]{4,})/i', $row->find('td')->eq(3)->text(), $match)) {
+						$date = new \DateTime($match[1]);
+						$data[$match[2]] = $date->format('Y-m-d');
+					}
+				}
+				return $data;
+			}
+		}
+		return false;
+	}
+
+	public function getLegacyEdgeVersions(?string $cache = null) : array|false {
+		$url = 'https://en.wikipedia.org/wiki/EdgeHTML';
+		if (($html = $this->fetch($url, $cache)) !== false) {
+			$data = [];
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				foreach ($obj->find('table.wikitable > tbody > tr') AS $row) {
+					$cells = $row->find('td');
+					if (($text = $cells->eq(1)->text()) !== '') {
+						$date = new \DateTime($text);
+						$data[\trim($cells->eq(0)->text())] = $date->format('Y-m-d');
+					}
+				}
+				return $data;
+			}
+		}
+		return false;
+	}
+
+	public function getSafariVersions(?string $cache = null) : array|false {
+		$url = 'https://developer.apple.com/tutorials/data/documentation/safari-release-notes.json';
+		if (($file = $this->fetch($url, $cache)) !== false && ($json = \json_decode($file)) !== null) {
+			$data = [];
+			foreach ($json->references AS $item) {
+				$text = $item->abstract[0]->text;
+				if (\preg_match('/([a-z]++ [0-9]{1,2}, [0-9]{4})[^0-9]++([0-9.]++) \(([0-9.]++)\)/i', $text, $match)) {
+					$date = new \DateTime($match[1]);
+					$data[$match[2]] = $date->format('Y-m-d');
+				}
+			}
+			return $data;
+		}
+		return false;
+	}
+
+	public function getInternetExplorerVersions() {
+		return [
+			'1' => '1995-07-24',
+			'2' => '1995-11-27',
+			'3' => '1996-08-13',
+			'4' => '1997-09-22',
+			'5' => '1999-03-18',
+			'5.0.1' => '1999-12-01',
+			'5.5' => '2000-05-19',
+			'6' => '2001-08-24',
+			'7' => '2006-10-18',
+			'8' => '2009-03-19',
+			'9' => '2011-03-19',
+			'10' => '2012-10-26',
+			'11' => '2013-10-17',
+			'11.0.7' => '2014-04-08',
+			'11.0.11' => '2014-08-12',
+			'11.0.15' => '2014-12-09',
+			'11.0.25' => '2015-11-12'
+		];
+	}
+
+	protected function getOperaClassicVersions() {
+		$url = 'https://help.opera.com/en/operas-archived-history/';
+	}
+
+	public function getOperaVersions() {
+
 	}
 }
