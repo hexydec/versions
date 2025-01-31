@@ -100,15 +100,16 @@ class generate {
 			if (($data = $this->getFromJson($url.($i * $items), ['version'], ['time'], $cache)) !== false) {
 				$chrome = \array_merge($chrome, \array_map(fn (int $time) => \date('Y-m-d', $time), $data));
 				if (\count($data) < $items) {
-					return $chrome;
+					break;
 				} else {
 					sleep(5);
 				}
 			} else {
-				return $chrome;
+				break;
 			}
 		}
-		return false;
+		\ksort($chrome, SORT_NUMERIC);
+		return $chrome ?: false;
 	}
 
 	public function getFirefoxVersions(?string $cache = null) : array|false {
@@ -125,6 +126,7 @@ class generate {
 						}
 					}
 				}
+				\ksort($data, SORT_NUMERIC);
 				return $data;
 			}
 		}
@@ -143,6 +145,7 @@ class generate {
 						$data[$match[2]] = $date->format('Y-m-d');
 					}
 				}
+				\ksort($data, SORT_NUMERIC);
 				return $data;
 			}
 		}
@@ -162,6 +165,7 @@ class generate {
 						$data[\trim($cells->eq(0)->text())] = $date->format('Y-m-d');
 					}
 				}
+				\ksort($data, SORT_NUMERIC);
 				return $data;
 			}
 		}
@@ -211,6 +215,7 @@ class generate {
 					$data[$match[2]] = $date->format('Y-m-d');
 				}
 			}
+			\ksort($data, SORT_NUMERIC);
 			return $data;
 		}
 		return false;
