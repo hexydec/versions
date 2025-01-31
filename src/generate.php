@@ -168,10 +168,42 @@ class generate {
 		return false;
 	}
 
+	protected function getLegacySafariVersions() : array {
+		return [
+			'1' => '2003-06-23',
+			'2' => '2005-04-29',
+			'2.0.2' => '2005-10-31',
+			'2.0.4' => '2006-01-10',
+			'3' => '2007-01-09',
+			'3.0.1' => '2007-06-14',
+			'3.0.2' => '2007-06-22',
+			'3.1' => '2008-03-18',
+			'3.1.2' => '2008-06-01',
+			'3.2' => '2008-11-13',
+			'3.2.3' => '2009-05-12',
+			'4' => '2009-06-08',
+			'4.0.1' => '2009-06-17',
+			'4.0.4' => '2009-11-11',
+			'5' => '2010-06-07',
+			'5.0.6' => '2010-06-31',
+			'5.1' => '2011-07-20',
+			'6' => '2012-07-25',
+			'7' => '2013-10-22',
+			'8' => '2014-06-06',
+			'9' => '2015-06-12',
+			'10' => '2016-09-20',
+			'10.1.2' => '2017-07-19',
+			'11' => '2017-09-19',
+			'12' => '2018-09-17',
+			'12.0.1' => '2018-10-30',
+			'12.0.2' => '2018-12-05'
+		];
+	}
+
 	public function getSafariVersions(?string $cache = null) : array|false {
 		$url = 'https://developer.apple.com/tutorials/data/documentation/safari-release-notes.json';
 		if (($file = $this->fetch($url, $cache)) !== false && ($json = \json_decode($file)) !== null) {
-			$data = [];
+			$data = $this->getLegacySafariVersions();
 			foreach ($json->references AS $item) {
 				$text = $item->abstract[0]->text;
 				if (\preg_match('/([a-z]++ [0-9]{1,2}, [0-9]{4})[^0-9]++([0-9.]++) \(([0-9.]++)\)/i', $text, $match)) {
