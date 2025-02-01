@@ -50,3 +50,15 @@ if (($data = $obj->getInternetExplorerVersions($cache)) !== false) {
 	var_dump('Found '.\count($data).' Internet Explorer versions found');
 	\file_put_contents($root.'/dist/internet-explorer-versions.json', \json_encode($data));
 }
+
+// brave
+if (($data = $obj->getBraveVersions($cache)) !== false) {
+	var_dump('Found '.\count($data).' Brave versions found');
+	\file_put_contents($root.'/dist/brave-versions.json', \json_encode($data));
+}
+
+// opera
+if (($data = $obj->getOperaVersions($cache)) !== false) {
+	var_dump('Found '.\count($data).' Opera versions found');
+	\file_put_contents($root.'/dist/opera-versions.json', \json_encode($data));
+}

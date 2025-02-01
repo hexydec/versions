@@ -243,15 +243,58 @@ class generate {
 		];
 	}
 
-	protected function getOperaClassicVersions() {
+	protected function getOperaClassicVersions(?string $cache = null) : array|false {
 		$url = 'https://help.opera.com/en/operas-archived-history/';
+		if (($html = $this->fetch($url, $cache)) !== false) {
+			$data = [];
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				foreach ($obj->find('tbody > tr') AS $row) {
+					$cells = $row->find('th,td');
+					if ($cells->eq(2)->text() === 'Final') {
+						$data[\explode(' ', $cells->eq(0)->text())[1]] = $cells->eq(1)->text();
+					}
+				}
+				\ksort($data, SORT_NUMERIC);
+				return $data;
+			}
+		}
+		return false;
 	}
 
-	public function getOperaVersions() {
+	public function getOperaVersions(?string $cache = null) : array|false {
+		$url = 'https://en.wikipedia.org/wiki/History_of_the_Opera_web_browser';
+		if (($data = $this->getOperaClassicVersions($cache)) === false) {
 
+		} elseif (($html = $this->fetch($url, $cache)) !== false) {
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				foreach ($obj->find('p') AS $row) {
+					$text = $row->text();
+					if (\preg_match('/Opera ([0-9]++) was released on ([a-z]++ [0-9]++, [0-9]{4})/i', $text, $match)) {
+						$date = new \DateTime($match[2]);
+						$data[$match[1]] = $date->format('Y-m-d');
+					} elseif (\preg_match('/([a-z]++ [0-9]++, [0-9]{4}), [a-z ]*Opera ([0-9]++)(?:\.0)? was released\./i', $text, $match)) {
+						$date = new \DateTime($match[1]);
+						$data[$match[2]] = $date->format('Y-m-d');
+					}
+				}
+				\ksort($data, SORT_NUMERIC);
+			}
+		}
+		return $data ?: false;
 	}
 
-	public function getBraveVersions() {
+	public function getBraveVersions(?string $cache = null) : array|false {
+		$data = [];
 		$url = 'https://versions.brave.com/latest/brave-versions.json';
+		if (($file = $this->fetch($url, $cache)) !== false && ($json = \json_decode($file)) !== null) {
+			foreach ($json AS $item) {
+				if ($item->channel === 'release') {
+					$data[$item->name] = \substr($item->published, 0, 10);
+				}
+			}
+		}
+		return $data ?: false;
 	}
 }
