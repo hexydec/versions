@@ -297,4 +297,44 @@ class generate {
 		}
 		return $data ?: false;
 	}
+
+	public function getVivaldiVersions(?string $cache = null) : array|false {
+		$data = [];
+		$url = 'https://vivaldi.com/download/archive/?platform=win';
+		if (($html = $this->fetch($url, $cache)) !== false) {
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				foreach ($obj->find('tbody > tr') AS $row) {
+					$text = $row->find('td > a')->eq(0)->text();
+					if (\str_ends_with($text, '.x64.exe')) {
+						$data[\substr($text, 8, -8)] = $row->find('td:first-child + td')->text();
+					}
+				}
+				\ksort($data, SORT_NUMERIC);
+				return $data;
+			}
+		}
+		return $data ?: false;
+	}
+
+	public function getMaxathonVersions(?string $cache = null) : array|false {
+		$data = [];
+		$url = 'https://www.maxthon.com/history';
+		if (($html = $this->fetch($url, $cache)) !== false) {
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				foreach ($obj->find('.history-list-text') AS $row) {
+					$title = $row->find('.history-list-title > span')->eq(0)->text();
+					if (\preg_match('/[0-9.]{3,}/', $title, $match)) {
+						$date = $row->find('.history-list-desc > span')->eq(1)->text();
+						$data[$match[0]] = $date.(\strlen($date) === 4 ? '-01-01' : '');
+
+					}
+				}
+				\ksort($data, SORT_NUMERIC);
+				return $data;
+			}
+		}
+		return $data ?: false;
+	}
 }

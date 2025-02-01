@@ -65,5 +65,19 @@ if (($data = $obj->getOperaVersions($cache)) !== false) {
 	\file_put_contents($root.'/dist/opera-versions.json', \json_encode($data));
 }
 
+// vivaldi
+if (($data = $obj->getVivaldiVersions($cache)) !== false) {
+	$all['vivaldi'] = $data;
+	var_dump('Found '.\count($data).' Vivaldi versions found');
+	\file_put_contents($root.'/dist/vivaldi-versions.json', \json_encode($data));
+}
+
+// maxathon
+if (($data = $obj->getMaxathonVersions($cache)) !== false) {
+	$all['maxathon'] = $data;
+	var_dump('Found '.\count($data).' Maxathon versions found');
+	\file_put_contents($root.'/dist/maxathon-versions.json', \json_encode($data));
+}
+
 // all
 \file_put_contents($root.'/dist/versions.json', \json_encode($all));
