@@ -98,7 +98,7 @@ class generate {
 		$chrome = [];
 		for ($i = 0; $i < 10; $i++) {
 			if (($data = $this->getFromJson($url.($i * $items), ['version'], ['time'], $cache)) !== false) {
-				$chrome = \array_merge($chrome, \array_map(fn (int $time) => \date('Y-m-d', $time), $data));
+				$chrome = \array_merge($chrome, \array_map(fn (int $time) => \date('Y-m-d', \intval($time / 1000)), $data));
 				if (\count($data) < $items) {
 					break;
 				} else {
@@ -133,26 +133,7 @@ class generate {
 		return false;
 	}
 
-	public function getEdgeVersions(?string $cache = null) : array|false {
-		$url = 'https://learn.microsoft.com/en-us/deployedge/microsoft-edge-release-schedule';
-		if (($html = $this->fetch($url, $cache)) !== false) {
-			$data = [];
-			$obj = new \hexydec\html\htmldoc();
-			if ($obj->load($html)) {
-				foreach ($obj->find('table > tbody > tr') AS $row) {
-					if (\preg_match('/([0-9]{2}-[a-z]{3}-[0-9]{4})\W++([0-9.]{4,})/i', $row->find('td')->eq(3)->text(), $match)) {
-						$date = new \DateTime($match[1]);
-						$data[$match[2]] = $date->format('Y-m-d');
-					}
-				}
-				\ksort($data, SORT_NUMERIC);
-				return $data;
-			}
-		}
-		return false;
-	}
-
-	public function getLegacyEdgeVersions(?string $cache = null) : array|false {
+	protected function getLegacyEdgeVersions(?string $cache = null) : array|false {
 		$url = 'https://en.wikipedia.org/wiki/EdgeHTML';
 		if (($html = $this->fetch($url, $cache)) !== false) {
 			$data = [];
@@ -163,6 +144,25 @@ class generate {
 					if (($text = $cells->eq(1)->text()) !== '') {
 						$date = new \DateTime($text);
 						$data[\trim($cells->eq(0)->text())] = $date->format('Y-m-d');
+					}
+				}
+				\ksort($data, SORT_NUMERIC);
+				return $data;
+			}
+		}
+		return false;
+	}
+
+	public function getEdgeVersions(?string $cache = null) : array|false {
+		$url = 'https://learn.microsoft.com/en-us/deployedge/microsoft-edge-release-schedule';
+		if (($html = $this->fetch($url, $cache)) !== false) {
+			$data = $this->getLegacyEdgeVersions($cache);
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				foreach ($obj->find('table > tbody > tr') AS $row) {
+					if (\preg_match('/([0-9]{2}-[a-z]{3}-[0-9]{4})\W++([0-9.]{4,})/i', $row->find('td')->eq(3)->text(), $match)) {
+						$date = new \DateTime($match[1]);
+						$data[$match[2]] = $date->format('Y-m-d');
 					}
 				}
 				\ksort($data, SORT_NUMERIC);
