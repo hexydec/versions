@@ -372,7 +372,7 @@ class generate {
 			'',
 			'class versions {',
 			'',
-			"\tpublic function get() : array {",
+			"\tpublic static function get() : array {",
 			"\t\treturn ["
 		];
 		foreach ($data AS $key => $item) {

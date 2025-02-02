@@ -4,7 +4,7 @@ namespace hexydec\version;
 
 class versions {
 
-	public function get() : array {
+	public static function get() : array {
 		return [
 			'chrome' => [
 				'48.0.2564.116' => '2016-02-18',
