@@ -4,7 +4,7 @@
     "type": "library",
     "license": "MIT",
 	"autoload": {
-		"classmap": ["src/"]
+		"classmap": ["src/", "dist/"]
 	},
     "authors": [
         {
