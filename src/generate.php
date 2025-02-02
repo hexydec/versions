@@ -368,7 +368,7 @@ class generate {
 		$php = [
 			'<?php',
 			'declare(strict_types=1);',
-			'namespace hexydec\\version;',
+			'namespace hexydec\\versions;',
 			'',
 			'class versions {',
 			'',
