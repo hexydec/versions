@@ -337,4 +337,54 @@ class generate {
 		}
 		return $data ?: false;
 	}
+
+	public function getSamsungInternetVersions(?string $cache = null) : array|false {
+		$data = [];
+		$url = '/uploads/?appcategory=samsung-internet-for-android';
+		while ($url !== null) {
+			if (($html = $this->fetch('https://www.apkmirror.com'.$url, $cache)) !== false) {
+				$obj = new \hexydec\html\htmldoc();
+				if ($obj->load($html)) {
+					foreach ($obj->find('.table-row') AS $row) {
+						$title = $row->find('a.fontBlack')->text();
+						if (\str_starts_with($title, 'Samsung Internet Browser ')) {
+							$date = new \DateTime($row->find('.visible-xs .dateyear_utc')->eq(0)->text());
+							$data[\explode(' ', \substr($title, 25))[0]] = $date->format('Y-m-d');
+						}
+					}
+					$url = $obj->find('a[rel=next]')->attr('href');
+				} else {
+					break;
+				}
+			} else {
+				break;
+			}
+		}
+		\ksort($data, SORT_NUMERIC);
+		return $data ?: false;
+	}
+
+	public function renderPhp(array $data) {
+		$php = [
+			'<?php',
+			'declare(strict_types=1);',
+			'namespace hexydec\\version;',
+			'',
+			'class versions {',
+			'',
+			"\tpublic function get() : array {",
+			"\t\treturn ["
+		];
+		foreach ($data AS $key => $item) {
+			$php[] = "\t\t\t'".$key."' => [";
+			foreach ($item AS $version => $date) {
+				$php[] = "\t\t\t\t'".$version."' => '".$date."',";
+			}
+			$php[] = "\t\t\t],";
+		}
+		$php[] = "\t\t];";
+		$php[] = "\t}";
+		$php[] = "}";
+		return \implode("\n", $php);
+	}
 }

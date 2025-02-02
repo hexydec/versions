@@ -46,7 +46,7 @@ if (($data = $obj->getSafariVersions($cache)) !== false) {
 
 // internet explorer
 if (($data = $obj->getInternetExplorerVersions($cache)) !== false) {
-	$all['internet explorer'] = $data;
+	$all['ie'] = $data;
 	var_dump('Found '.\count($data).' Internet Explorer versions found');
 	\file_put_contents($root.'/dist/internet-explorer-versions.json', \json_encode($data));
 }
@@ -79,5 +79,15 @@ if (($data = $obj->getMaxathonVersions($cache)) !== false) {
 	\file_put_contents($root.'/dist/maxathon-versions.json', \json_encode($data));
 }
 
+// samsung
+if (($data = $obj->getSamsungInternetVersions($cache)) !== false) {
+	$all['samsung'] = $data;
+	var_dump('Found '.\count($data).' Samsung Internet versions found');
+	\file_put_contents($root.'/dist/samsung-internet-versions.json', \json_encode($data));
+}
+
 // all
 \file_put_contents($root.'/dist/versions.json', \json_encode($all));
+
+// php file
+\file_put_contents($root.'/dist/versions.php', $obj->renderPhp($all));

@@ -3,11 +3,9 @@
     "description": "A list of browser, engine and platform version numbers, along with release dates",
     "type": "library",
     "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Hexydec\\Versions\\": "src/"
-        }
-    },
+	"autoload": {
+		"classmap": ["src/"]
+	},
     "authors": [
         {
             "name": "Hexydec",
