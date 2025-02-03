@@ -49,6 +49,7 @@ class generate {
 			]);
 			if ($contents) {
 				if (($file = \file_get_contents($url, false, $context)) !== false) {
+					\sleep(3);
 				
 					// save to local file
 					if ($local !== null) {
@@ -317,7 +318,7 @@ class generate {
 		return $data ?: false;
 	}
 
-	public function getMaxathonVersions(?string $cache = null) : array|false {
+	public function getMaxthonVersions(?string $cache = null) : array|false {
 		$data = [];
 		$url = 'https://www.maxthon.com/history';
 		if (($html = $this->fetch($url, $cache)) !== false) {
@@ -338,21 +339,21 @@ class generate {
 		return $data ?: false;
 	}
 
-	public function getSamsungInternetVersions(?string $cache = null) : array|false {
+	protected function getApkMirror(string $path, string $prefix, ?string $cache = null) : array|false {
 		$data = [];
-		$url = '/uploads/?appcategory=samsung-internet-for-android';
-		while ($url !== null) {
-			if (($html = $this->fetch('https://www.apkmirror.com'.$url, $cache)) !== false) {
+		$len = \strlen($prefix);
+		while ($path !== null) {
+			if (($html = $this->fetch('https://www.apkmirror.com'.$path, $cache)) !== false) {
 				$obj = new \hexydec\html\htmldoc();
 				if ($obj->load($html)) {
 					foreach ($obj->find('.table-row') AS $row) {
 						$title = $row->find('a.fontBlack')->text();
-						if (\str_starts_with($title, 'Samsung Internet Browser ')) {
+						if (\str_starts_with($title, $prefix)) {
 							$date = new \DateTime($row->find('.visible-xs .dateyear_utc')->eq(0)->text());
-							$data[\explode(' ', \substr($title, 25))[0]] = $date->format('Y-m-d');
+							$data[\explode(' ', \substr($title, $len))[0]] = $date->format('Y-m-d');
 						}
 					}
-					$url = $obj->find('a[rel=next]')->attr('href');
+					$path = $obj->find('a[rel=next]')->attr('href');
 				} else {
 					break;
 				}
@@ -361,6 +362,34 @@ class generate {
 			}
 		}
 		\ksort($data, SORT_NUMERIC);
+		return $data ?: false;
+	}
+
+	public function getSamsungInternetVersions(?string $cache = null) : array|false {
+		return $this->getApkMirror('/uploads/?appcategory=samsung-internet-for-android', 'Samsung Internet Browser ', $cache);
+	}
+
+	public function getHuaweiBrowserVersions(?string $cache = null) : array|false {
+		return $this->getApkMirror('/uploads/?appcategory=huawei-browser', 'HUAWEI Browser ', $cache);
+	}
+
+	public function getKmeleonVersions(?string $cache = null) : array|false {
+		$data = [];
+		$url = 'http://kmeleonbrowser.org/wiki/DownloadsArchive';
+		if (($html = $this->fetch($url, $cache)) !== false) {
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				foreach ($obj->find('.text-body h4') AS $row) {
+					$title = $row->text();
+					if (\preg_match('/K-Meleon ([0-9.]++)[^(]++\(([0-9-]++)\)/', $title, $match)) {
+						$data[$match[1]] = $match[2];
+
+					}
+				}
+				\ksort($data, SORT_NUMERIC);
+				return $data;
+			}
+		}
 		return $data ?: false;
 	}
 

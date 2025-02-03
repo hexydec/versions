@@ -72,11 +72,11 @@ if (($data = $obj->getVivaldiVersions($cache)) !== false) {
 	\file_put_contents($root.'/dist/vivaldi-versions.json', \json_encode($data));
 }
 
-// maxathon
-if (($data = $obj->getMaxathonVersions($cache)) !== false) {
-	$all['maxathon'] = $data;
-	var_dump('Found '.\count($data).' Maxathon versions found');
-	\file_put_contents($root.'/dist/maxathon-versions.json', \json_encode($data));
+// maxthon
+if (($data = $obj->getMaxthonVersions($cache)) !== false) {
+	$all['maxthon'] = $data;
+	var_dump('Found '.\count($data).' Maxthon versions found');
+	\file_put_contents($root.'/dist/maxthon-versions.json', \json_encode($data));
 }
 
 // samsung
@@ -86,8 +86,19 @@ if (($data = $obj->getSamsungInternetVersions($cache)) !== false) {
 	\file_put_contents($root.'/dist/samsung-internet-versions.json', \json_encode($data));
 }
 
+// samsung
+if (($data = $obj->getHuaweiBrowserVersions($cache)) !== false) {
+	$all['huawei'] = $data;
+	var_dump('Found '.\count($data).' Huawei Browser versions found');
+	\file_put_contents($root.'/dist/huawei-browser-versions.json', \json_encode($data));
+}
+
+// kmeleon
+if (($data = $obj->getKmeleonVersions($cache)) !== false) {
+	$all['kmeleon'] = $data;
+	var_dump('Found '.\count($data).' K-Meleon versions found');
+	\file_put_contents($root.'/dist/kmeleon-versions.json', \json_encode($data));
+}
+
 // all
 \file_put_contents($root.'/dist/versions.json', \json_encode($all));
-
-// php file
-\file_put_contents($root.'/dist/versions.php', $obj->renderPhp($all));
