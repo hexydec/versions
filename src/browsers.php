@@ -31,7 +31,9 @@ class browsers {
 			'ucbrowser' => [$this, 'getUcBrowserVersions'],
 			'silk' => [$this, 'getSilkBrowserVersions'],
 			'waterfox' => [$this, 'getWaterfoxVersions'],
-			'palemoon' => [$this, 'getPaleMoonVersions']
+			'palemoon' => [$this, 'getPaleMoonVersions'],
+			'oculus' => [$this, 'getOculusBrowserVersions'],
+			'midori' => [$this, 'getMidoriVersions']
 		];
 
 		// read existing file
@@ -182,7 +184,7 @@ class browsers {
 		$chrome = [];
 		for ($i = 0; $i < 10; $i++) {
 			if (($data = $this->getFromJson($url.($i * $items), ['version'], ['time'])) !== false) {
-				$chrome = \array_merge($chrome, \array_map(fn (int $time) => \date('Y-m-d', \intval($time / 1000)), $data));
+				$chrome = \array_merge($chrome, \array_map(fn (int $time) : int => \intval(\date('Ymd', \intval($time / 1000))), $data));
 				if (\count($data) < $items || !$rebuild) {
 					break;
 				}
@@ -203,7 +205,7 @@ class browsers {
 					$caption = $item->find('caption')->text();
 					if ($caption === 'Past releases') {
 						foreach ($item->find('tbody > tr') AS $row) {
-							$data[$row->find('td:first-child')->text()] = $row->find('td:last-child')->text();
+							$data[$row->find('td:first-child')->text()] = \intval(\str_replace('-', '', $row->find('td:last-child')->text()));
 						}
 					}
 				}
@@ -223,7 +225,7 @@ class browsers {
 					$cells = $row->find('td');
 					if (($text = $cells->eq(1)->text()) !== '') {
 						$date = new \DateTime($text);
-						$data[\trim($cells->eq(0)->text())] = $date->format('Y-m-d');
+						$data[\trim($cells->eq(0)->text())] = \intval($date->format('Ymd'));
 					}
 				}
 				return $data;
@@ -241,7 +243,7 @@ class browsers {
 				foreach ($obj->find('table > tbody > tr') AS $row) {
 					if (\preg_match('/([0-9]{2}-[a-z]{3}-[0-9]{4})\W++([0-9.]{4,})/i', $row->find('td')->eq(3)->text(), $match)) {
 						$date = new \DateTime($match[1]);
-						$data[$match[2]] = $date->format('Y-m-d');
+						$data[$match[2]] = \intval($date->format('Ymd'));
 					}
 				}
 				return $data;
@@ -252,33 +254,33 @@ class browsers {
 
 	protected function getLegacySafariVersions() : array {
 		return [
-			'1' => '2003-06-23',
-			'2' => '2005-04-29',
-			'2.0.2' => '2005-10-31',
-			'2.0.4' => '2006-01-10',
-			'3' => '2007-01-09',
-			'3.0.1' => '2007-06-14',
-			'3.0.2' => '2007-06-22',
-			'3.1' => '2008-03-18',
-			'3.1.2' => '2008-06-01',
-			'3.2' => '2008-11-13',
-			'3.2.3' => '2009-05-12',
-			'4' => '2009-06-08',
-			'4.0.1' => '2009-06-17',
-			'4.0.4' => '2009-11-11',
-			'5' => '2010-06-07',
-			'5.0.6' => '2010-06-31',
-			'5.1' => '2011-07-20',
-			'6' => '2012-07-25',
-			'7' => '2013-10-22',
-			'8' => '2014-06-06',
-			'9' => '2015-06-12',
-			'10' => '2016-09-20',
-			'10.1.2' => '2017-07-19',
-			'11' => '2017-09-19',
-			'12' => '2018-09-17',
-			'12.0.1' => '2018-10-30',
-			'12.0.2' => '2018-12-05'
+			'1' => 20030623,
+			'2' => 20050429,
+			'2.0.2' => 20051031,
+			'2.0.4' => 20060110,
+			'3' => 20070109,
+			'3.0.1' => 20070614,
+			'3.0.2' => 20070622,
+			'3.1' => 20080318,
+			'3.1.2' => 20080601,
+			'3.2' => 20081113,
+			'3.2.3' => 20090512,
+			'4' => 20090608,
+			'4.0.1' => 20090617,
+			'4.0.4' => 20091111,
+			'5' => 20100607,
+			'5.0.6' => 20100631,
+			'5.1' => 20110720,
+			'6' => 20120725,
+			'7' => 20131022,
+			'8' => 20140606,
+			'9' => 20150612,
+			'10' => 20160920,
+			'10.1.2' => 20170719,
+			'11' => 20170919,
+			'12' => 20180917,
+			'12.0.1' => 20181030,
+			'12.0.2' => 20181205
 		];
 	}
 
@@ -290,7 +292,7 @@ class browsers {
 				$text = $item->abstract[0]->text;
 				if (\preg_match('/([a-z]++ [0-9]{1,2}, [0-9]{4})[^0-9]++([0-9.]++) \(([0-9.]++)\)/i', $text, $match)) {
 					$date = new \DateTime($match[1]);
-					$data[$match[2]] = $date->format('Y-m-d');
+					$data[$match[2]] = \intval($date->format('Ymd'));
 				}
 			}
 			return $data;
@@ -300,23 +302,23 @@ class browsers {
 
 	protected function getInternetExplorerVersions() {
 		return [
-			'1' => '1995-07-24',
-			'2' => '1995-11-27',
-			'3' => '1996-08-13',
-			'4' => '1997-09-22',
-			'5' => '1999-03-18',
-			'5.0.1' => '1999-12-01',
-			'5.5' => '2000-05-19',
-			'6' => '2001-08-24',
-			'7' => '2006-10-18',
-			'8' => '2009-03-19',
-			'9' => '2011-03-19',
-			'10' => '2012-10-26',
-			'11' => '2013-10-17',
-			'11.0.7' => '2014-04-08',
-			'11.0.11' => '2014-08-12',
-			'11.0.15' => '2014-12-09',
-			'11.0.25' => '2015-11-12'
+			'1' => 19950724,
+			'2' => 19951127,
+			'3' => 19960813,
+			'4' => 19970922,
+			'5' => 19990318,
+			'5.0.1' => 19991201,
+			'5.5' => 20000519,
+			'6' => 20010824,
+			'7' => 20061018,
+			'8' => 20090319,
+			'9' => 20110319,
+			'10' => 20121026,
+			'11' => 20131017,
+			'11.0.7' => 20140408,
+			'11.0.11' => 20140812,
+			'11.0.15' => 20141209,
+			'11.0.25' => 20151112
 		];
 	}
 
@@ -329,7 +331,7 @@ class browsers {
 				foreach ($obj->find('tbody > tr') AS $row) {
 					$cells = $row->find('th,td');
 					if ($cells->eq(2)->text() === 'Final') {
-						$data[\explode(' ', $cells->eq(0)->text())[1]] = $cells->eq(1)->text();
+						$data[\explode(' ', $cells->eq(0)->text())[1]] = \intval(\str_replace('-', '', $cells->eq(1)->text()));
 					}
 				}
 				return $data;
@@ -341,19 +343,26 @@ class browsers {
 	protected function getOperaVersions(bool $rebuild = false) : array|false {
 		$url = 'https://en.wikipedia.org/wiki/History_of_the_Opera_web_browser';
 		$data = [];
+
+		// get classic opera versions
 		if ($rebuild && ($data = $this->getOperaClassicVersions()) === false) {
 
+		// get current versions
 		} elseif (($html = $this->fetch($url)) !== false) {
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($html)) {
 				foreach ($obj->find('p') AS $row) {
 					$text = $row->text();
+
+					// match "Opera XXX was released on Month XXst, XXXX"
 					if (\preg_match('/Opera ([0-9]++) was released on ([a-z]++ [0-9]++, [0-9]{4})/i', $text, $match)) {
 						$date = new \DateTime($match[2]);
-						$data[$match[1]] = $date->format('Y-m-d');
+						$data[$match[1]] = \intval($date->format('Ymd'));
+
+					// match Month XXst, XXXX, [some text] Opera XXX was released.
 					} elseif (\preg_match('/([a-z]++ [0-9]++, [0-9]{4}), [a-z ]*Opera ([0-9]++)(?:\.0)? was released\./i', $text, $match)) {
 						$date = new \DateTime($match[1]);
-						$data[$match[2]] = $date->format('Y-m-d');
+						$data[$match[2]] = \intval($date->format('Ymd'));
 					}
 				}
 			}
@@ -367,7 +376,7 @@ class browsers {
 		if (($file = $this->fetch($url)) !== false && ($json = \json_decode($file)) !== null) {
 			foreach ($json AS $item) {
 				if ($item->channel === 'release') {
-					$data[$item->name] = \substr($item->published, 0, 10);
+					$data[$item->name] = \intval(\str_replace('-', '', \substr($item->published, 0, 10)));
 				}
 			}
 		}
@@ -383,7 +392,7 @@ class browsers {
 				foreach ($obj->find('tbody > tr') AS $row) {
 					$text = $row->find('td > a')->eq(0)->text();
 					if (\str_ends_with($text, '.x64.exe')) {
-						$data[\substr($text, 8, -8)] = $row->find('td:first-child + td')->text();
+						$data[\substr($text, 8, -8)] = \intval(\str_replace('-', '', $row->find('td:first-child + td')->text()));
 					}
 				}
 				return $data;
@@ -402,7 +411,7 @@ class browsers {
 					$title = $row->find('.history-list-title > span')->eq(0)->text();
 					if (\preg_match('/[0-9.]{3,}/', $title, $match)) {
 						$date = $row->find('.history-list-desc > span')->eq(1)->text();
-						$data[$match[0]] = $date.(\strlen($date) === 4 ? '-01-01' : '');
+						$data[$match[0]] = \intval(\str_replace('-', '', $date.(\strlen($date) === 4 ? '-01-01' : '')));
 
 					}
 				}
@@ -425,7 +434,7 @@ class browsers {
 							$date = new \DateTime($row->find('.visible-xs .dateyear_utc')->eq(0)->text());
 							$version = \explode(' ', \substr($title, $len))[0];
 							if (!\in_array($version, $not)) {
-								$data[$version] = $date->format('Y-m-d');
+								$data[$version] = \intval($date->format('Ymd'));
 							}
 						}
 					}
@@ -465,7 +474,7 @@ class browsers {
 				foreach ($obj->find('.text-body h4') AS $row) {
 					$title = $row->text();
 					if (\preg_match('/([0-9.]++)[^(]++\(([0-9-]++)\)/', $title, $match)) {
-						$data[$match[1]] = $match[2];
+						$data[$match[1]] = \intval(\str_replace('-', '', $match[2]));
 
 					}
 				}
@@ -484,7 +493,7 @@ class browsers {
 					foreach ($obj->find('.content-list > li') AS $row) {
 						$title = \ltrim($row->find('a.gl-font-bold')->text(), 'v');
 						$date = new \DateTime($row->find('time')->attr('datetime'));
-						$data[$title] = $date->format('Y-m-d');
+						$data[$title] = \intval($date->format('Ymd'));
 					}
 					$path = $rebuild ? $obj->find('a[rel=next]')->attr('href') : null;
 				} else {
@@ -512,7 +521,7 @@ class browsers {
 			
 		} else {
 			foreach ($items AS $item) {
-				$data[$item['label']] = (new \DateTime($item['pubDate']))->format('Y-m-d');
+				$data[$item['label']] = \intval((new \DateTime($item['pubDate']))->format('Ymd'));
 			}
 		}
 		return $data ?: false;
@@ -524,7 +533,58 @@ class browsers {
 		if (($xml = $this->fetch($url)) !== false) {
 			$obj = \simplexml_load_string($xml);
 			foreach ($obj->xpath('//channel/item') AS $item) {
-				$data[\mb_substr((string) $item->title, 10)] = (new \DateTime((string) $item->pubDate))->format('Y-m-d');
+				$data[\mb_substr((string) $item->title, 10)] = \intval((new \DateTime((string) $item->pubDate))->format('Ymd'));
+			}
+		}
+		return $data ?: false;
+	}
+
+	protected function getOculusBrowserVersions(bool $rebuild = false) : array|false {
+		$url = 'https://en.wikipedia.org/wiki/Meta_Quest_Browser';
+		if (($html = $this->fetch($url)) !== false) {
+			$data = [];
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				foreach ($obj->find('table.wikitable > tbody > tr') AS $row) {
+					$cells = $row->find('td');
+					if (($text = $cells->eq(1)->text()) !== '') {
+						$date = new \DateTime($text);
+						$data[\trim($cells->eq(0)->text())] = \intval($date->format('Ymd'));
+					}
+				}
+				return $data;
+			}
+		}
+		return false;
+	}
+
+	protected function getMidoriVersions(bool $rebuild = false) : array|false {
+		$data = [];
+		$path = '/goastian/midori-desktop/tags';
+		while ($path !== null) {
+			if (($html = $this->fetch('https://github.com'.$path)) !== false) {
+				$obj = new \hexydec\html\htmldoc();
+				if ($obj->load($html)) {
+
+					// extract versions
+					foreach ($obj->find('.Box-row') AS $row) {
+						$date = new \DateTime($row->find('.relative-time')->text());
+						$data[\ltrim($row->find('.Link--primary')->text(), 'v')] = \intval($date->format('Ymd'));
+					}
+
+					// get next page
+					$found = false;
+					foreach ($obj->find('.pagination a') AS $item) {
+						if ($item->text() === 'Next' && ($href = $item->attr('href')) !== null) {
+							$path = $href !== $path ? $href : null;
+							$found = true;
+							break;
+						}
+					}
+					if (!$found) {
+						break;
+					}
+				}
 			}
 		}
 		return $data ?: false;
