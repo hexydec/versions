@@ -235,9 +235,29 @@ class browsers {
 	}
 
 	protected function getEdgeVersions(bool $rebuild = false) : array|false {
+		$data = $rebuild ? $this->getLegacyEdgeVersions() : [];
+		$url = 'https://learn.microsoft.com/en-us/deployedge/microsoft-edge-relnote-archive-stable-channel';
+		if ($rebuild && ($html = $this->fetch($url)) !== false) {
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				$year = null;
+				$last = 12;
+				foreach ($obj->find('h2') AS $row) {
+					if (\preg_match('/^Version ([0-9.]++): ([a-z]++ [0-9]++(?:, ([0-9]{4}))?)/i', $row->text(), $match)) {
+						$date = new \DateTime($match[2]);
+						$month = $date->format('n');
+						$year = \intval($match[3] ?? ($month > $last ? $year - 1 : $year)); // track the year, as sometimes it is not there
+						$last = $month;
+						$date->setDate($year, \intval($date->format('m')), \intval($date->format('d')));
+						$data[$match[1]] = \intval($date->format('Ymd'));
+					}
+				}
+			}
+		}
+
+		// the other page is not always up to date
 		$url = 'https://learn.microsoft.com/en-us/deployedge/microsoft-edge-release-schedule';
 		if (($html = $this->fetch($url)) !== false) {
-			$data = $rebuild ? $this->getLegacyEdgeVersions() : [];
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($html)) {
 				foreach ($obj->find('table > tbody > tr') AS $row) {
@@ -246,10 +266,9 @@ class browsers {
 						$data[$match[2]] = \intval($date->format('Ymd'));
 					}
 				}
-				return $data;
 			}
 		}
-		return false;
+		return $data ?: false;
 	}
 
 	protected function getLegacySafariVersions() : array {
@@ -462,7 +481,10 @@ class browsers {
 	}
 
 	protected function getSilkBrowserVersions(bool $rebuild = false) : array|false {
-		return $this->getApkMirror('/uploads/?appcategory=silk-browser', 'Silk Browser ', $rebuild);
+		if (($data = $this->getApkMirror('/uploads/?appcategory=silk-browser', 'Silk Browser ', $rebuild)) !== false) {
+			return \array_filter($data, fn (int $item, string $key) : bool => \intval($key) >= 96, ARRAY_FILTER_USE_BOTH); // the datasource has big gaps before v96, which is not helpful for dermining user agent tampering, so just binning them
+		}
+		return false;
 	}
 
 	protected function getKmeleonVersions(bool $rebuild = false) : array|false {
@@ -547,7 +569,7 @@ class browsers {
 			if ($obj->load($html)) {
 				foreach ($obj->find('table.wikitable > tbody > tr') AS $row) {
 					$cells = $row->find('td');
-					if (($text = $cells->eq(1)->text()) !== '') {
+					if (($text = \trim($cells->eq(1)->text())) !== '') {
 						$date = new \DateTime($text);
 						$data[\trim($cells->eq(0)->text())] = \intval($date->format('Ymd'));
 					}
@@ -568,7 +590,7 @@ class browsers {
 
 					// extract versions
 					foreach ($obj->find('.Box-row') AS $row) {
-						$date = new \DateTime($row->find('.relative-time')->text());
+						$date = new \DateTime($row->find('relative-time')->text());
 						$data[\ltrim($row->find('.Link--primary')->text(), 'v')] = \intval($date->format('Ymd'));
 					}
 
