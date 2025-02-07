@@ -29,7 +29,7 @@ class browsers {
 			'kmeleon' => [$this, 'getKmeleonVersions'],
 			'konqueror' => [$this, 'getKonquerorVersions'],
 			'ucbrowser' => [$this, 'getUcBrowserVersions'],
-			'silk' => [$this, 'getSilkBrowserVersions'],
+			// 'silk' => [$this, 'getSilkBrowserVersions'],
 			'waterfox' => [$this, 'getWaterfoxVersions'],
 			'palemoon' => [$this, 'getPaleMoonVersions'],
 			'oculus' => [$this, 'getOculusBrowserVersions'],
@@ -236,6 +236,22 @@ class browsers {
 
 	protected function getEdgeVersions(bool $rebuild = false) : array|false {
 		$data = $rebuild ? $this->getLegacyEdgeVersions() : [];
+
+		// this is the most up to date page
+		$url = 'https://learn.microsoft.com/en-us/deployedge/microsoft-edge-release-schedule';
+		if (($html = $this->fetch($url)) !== false) {
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				foreach ($obj->find('table > tbody > tr') AS $row) {
+					if (\preg_match('/([0-9]{2}-[a-z]{3}-[0-9]{4})\W++([0-9.]{4,})/i', $row->find('td')->eq(3)->text(), $match)) {
+						$date = new \DateTime($match[1]);
+						$data[$match[2]] = \intval($date->format('Ymd'));
+					}
+				}
+			}
+		}
+
+		// this has all the previous chromium builds
 		$url = 'https://learn.microsoft.com/en-us/deployedge/microsoft-edge-relnote-archive-stable-channel';
 		if ($rebuild && ($html = $this->fetch($url)) !== false) {
 			$obj = new \hexydec\html\htmldoc();
@@ -250,20 +266,6 @@ class browsers {
 						$last = $month;
 						$date->setDate($year, \intval($date->format('m')), \intval($date->format('d')));
 						$data[$match[1]] = \intval($date->format('Ymd'));
-					}
-				}
-			}
-		}
-
-		// the other page is not always up to date
-		$url = 'https://learn.microsoft.com/en-us/deployedge/microsoft-edge-release-schedule';
-		if (($html = $this->fetch($url)) !== false) {
-			$obj = new \hexydec\html\htmldoc();
-			if ($obj->load($html)) {
-				foreach ($obj->find('table > tbody > tr') AS $row) {
-					if (\preg_match('/([0-9]{2}-[a-z]{3}-[0-9]{4})\W++([0-9.]{4,})/i', $row->find('td')->eq(3)->text(), $match)) {
-						$date = new \DateTime($match[1]);
-						$data[$match[2]] = \intval($date->format('Ymd'));
 					}
 				}
 			}
@@ -480,12 +482,12 @@ class browsers {
 		return $this->getApkMirror('/uploads/?appcategory=uc-browser', 'UC Browser-Safe, Fast, Private ', $rebuild);
 	}
 
-	protected function getSilkBrowserVersions(bool $rebuild = false) : array|false {
-		if (($data = $this->getApkMirror('/uploads/?appcategory=silk-browser', 'Silk Browser ', $rebuild)) !== false) {
-			return \array_filter($data, fn (int $item, string $key) : bool => \intval($key) >= 96, ARRAY_FILTER_USE_BOTH); // the datasource has big gaps before v96, which is not helpful for dermining user agent tampering, so just binning them
-		}
-		return false;
-	}
+	// protected function getSilkBrowserVersions(bool $rebuild = false) : array|false {
+	// 	if (($data = $this->getApkMirror('/uploads/?appcategory=silk-browser', 'Silk Browser ', $rebuild)) !== false) {
+	// 		return \array_filter($data, fn (int $item, string $key) : bool => \intval($key) >= 96, ARRAY_FILTER_USE_BOTH); // the datasource has big gaps before v96, which is not helpful for dermining user agent tampering, so just binning them
+	// 	}
+	// 	return false;
+	// }
 
 	protected function getKmeleonVersions(bool $rebuild = false) : array|false {
 		$data = [];
