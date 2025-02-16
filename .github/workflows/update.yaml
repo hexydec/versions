@@ -15,10 +15,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install PHP
-        uses: nanasess/setup-php@v4
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
         with:
-          php-version: '8.3'
+            path: /tmp/composer-cache
+            key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+
+      - name: Install Composer
+        uses: php-actions/composer@v6
+        with:
+            php_version: 8.3
+            php_extensions: mbstring xdebug
+
+      - name: Build
       - run: php src/build.php
 
       - uses: stefanzweifel/git-auto-commit-action@v5

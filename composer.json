@@ -1,6 +1,6 @@
 {
     "name": "hexydec/versions",
-    "description": "A list of browser, engine and platform version numbers, along with release dates",
+    "description": "A list of browser version numbers, along with release dates",
     "type": "library",
     "license": "MIT",
 	"autoload": {
