@@ -28,7 +28,7 @@ jobs:
             php_extensions: mbstring xdebug
 
       - name: Build
-      - run: php src/build.php
+        run: php src/build.php
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
