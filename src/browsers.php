@@ -31,7 +31,7 @@ class browsers {
 			'ucbrowser' => [$this, 'getUcBrowserVersions'],
 			// 'silk' => [$this, 'getSilkBrowserVersions'],
 			'waterfox' => [$this, 'getWaterfoxVersions'],
-			'palemoon' => [$this, 'getPaleMoonVersions'],
+			// 'palemoon' => [$this, 'getPaleMoonVersions'],
 			'oculus' => [$this, 'getOculusBrowserVersions'],
 			'midori' => [$this, 'getMidoriVersions']
 		];

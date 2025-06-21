@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "de4bba9adc257026b61392b38cf62d5f",
+    "content-hash": "d8f3c8353d779cd4238b05e9a34cd774",
     "packages": [
         {
             "name": "hexydec/cssdoc",
@@ -63,7 +63,7 @@
         },
         {
             "name": "hexydec/htmldoc",
-            "version": "1.8.6",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/htmldoc.git",
@@ -85,6 +85,7 @@
                 "phpstan/phpstan": "^1.10",
                 "phpunit/phpunit": "10.1.2"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -237,10 +238,12 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "beta",
-    "stability-flags": [],
+    "stability-flags": {
+        "hexydec/htmldoc": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
-    "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "platform": {},
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
 }
