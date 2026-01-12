@@ -532,20 +532,14 @@ class browsers {
 
 	protected function getWaterfoxVersions(bool $rebuild = false) : array|false {
 		$data = [];
-		$url = 'https://www.waterfox.net/download/';
-		if (($html = $this->fetch($url)) === false) {
+		$url = 'https://api.github.com/repos/BrowserWorks/waterfox/releases';
+		if (($json = $this->fetch($url)) === false) {
 
-		} elseif (($start = \mb_strpos($html, '(function(){const items = [{')) === false) {
-			
-		} elseif (($end = \mb_strpos($html, ';', $start)) === false) {
-
-		} elseif (($json = \mb_substr($html, $start + 26, $end - $start - 26)) === false) {
-			
 		} elseif (($items = \json_decode($json, true)) === null) {
 			
 		} else {
 			foreach ($items AS $item) {
-				$data[$item['label']] = \intval((new \DateTime($item['pubDate']))->format('Ymd'));
+				$data[$item['tag_name']] = \intval((new \DateTime($item['published_at']))->format('Ymd'));
 			}
 		}
 		return $data ?: false;
@@ -553,7 +547,8 @@ class browsers {
 
 	protected function getPalemoonVersions(bool $rebuild = false) : array|false {
 		$data = [];
-		$url = 'https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases.rss';
+		// $url = 'https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases.rss';
+		$url = \dirname(__DIR__).'/source/palemoon-releases.rss';
 		if (($xml = $this->fetch($url)) !== false) {
 			$obj = \simplexml_load_string($xml);
 			foreach ($obj->xpath('//channel/item') AS $item) {
