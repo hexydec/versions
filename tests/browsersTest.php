@@ -115,9 +115,12 @@ final class browsersTest extends \PHPUnit\Framework\TestCase {
 			$this->assertTrue($browsers->build($target));
 			$data = \json_decode((string) \file_get_contents($target), true);
 			$this->assertIsArray($data);
-			foreach (['chrome', 'firefox', 'edge', 'safari', 'ie', 'opera', 'brave', 'vivaldi', 'maxthon', 'samsung', 'huawei', 'ucbrowser', 'palemoon', 'waterfox', 'oculus', 'midori', 'konqueror', 'kmeleon'] AS $key) {
+			foreach (['chrome', 'firefox', 'edge', 'safari', 'ie', 'opera', 'brave', 'vivaldi', 'maxthon', 'samsung', 'huawei', 'ucbrowser', 'waterfox', 'oculus', 'midori', 'konqueror', 'kmeleon'] AS $key) {
 				$this->assertArrayHasKey($key, $data, "Expected browser '$key' in output");
 				$this->assertNotEmpty($data[$key], "Browser '$key' should have versions");
+			}
+			if (isset($data['palemoon'])) { // may be absent when RSS is behind bot detection
+				$this->assertNotEmpty($data['palemoon'], "Browser 'palemoon' should have versions");
 			}
 		} finally {
 			if (\file_exists($target)) {

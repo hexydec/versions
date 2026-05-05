@@ -4,8 +4,8 @@ use hexydec\versions\browsers;
 
 class browsersPublic extends browsers {
 
-	public function getChromeVersions(bool $rebuild = false) : array|false {
-		return parent::getChromeVersions($rebuild);
+	public function getChromeVersions(bool $rebuild = false, array $existing = []) : array|false {
+		return parent::getChromeVersions($rebuild, $existing);
 	}
 
 	public function getFirefoxVersions(bool $rebuild = false) : array|false {

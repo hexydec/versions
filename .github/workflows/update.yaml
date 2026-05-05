@@ -29,6 +29,8 @@ jobs:
 
       - name: Build
         run: php src/build.php
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:

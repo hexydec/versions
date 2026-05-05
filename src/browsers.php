@@ -14,8 +14,20 @@ class browsers {
 	}
 
 	public function build(string $target, bool $rebuild = false) : bool {
+
+		// read existing file as baseline (preserved for sources that fail to fetch on rebuild)
+		if (!\file_exists($target)) {
+			$data = [];
+		} elseif (($json = \file_get_contents($target)) === false) {
+			\trigger_error('Could not read file', E_USER_WARNING);
+			$data = [];
+		} elseif (($data = \json_decode($json, true)) === null) {
+			\trigger_error('Data is not valid JSON', E_USER_WARNING);
+			$data = [];
+		}
+
 		$browsers = [
-			'chrome' => [$this, 'getChromeVersions'],
+			'chrome' => fn (bool $rebuild) => $this->getChromeVersions($rebuild, $data['chrome'] ?? []),
 			'firefox' => [$this, 'getFirefoxVersions'],
 			'edge' => [$this, 'getEdgeVersions'],
 			'safari' => [$this, 'getSafariVersions'],
@@ -36,21 +48,11 @@ class browsers {
 			'midori' => [$this, 'getMidoriVersions']
 		];
 
-		// read existing file as baseline (preserved for sources that fail to fetch on rebuild)
-		if (!\file_exists($target)) {
-			$data = [];
-		} elseif (($json = \file_get_contents($target)) === false) {
-			\trigger_error('Could not read file', E_USER_WARNING);
-			$data = [];
-		} elseif (($data = \json_decode($json, true)) === null) {
-			\trigger_error('Data is not valid JSON', E_USER_WARNING);
-			$data = [];
-		}
-
 		// update browser versions
 		$added = 0;
 		$total = 0;
 		foreach ($browsers AS $key => $item) {
+			// $rebuild = $key === 'samsung';
 			if (($results = \call_user_func($item, $rebuild)) !== false) {
 				$existing = $data[$key] ?? [];
 				$new = $rebuild ? $results : \array_diff_key($results, $existing);
@@ -92,7 +94,7 @@ class browsers {
 		\call_user_func($this->config['msg'] ?? function (string $msg) : void {echo $msg."\n";}, $msg);
 	}
 
-	protected function fetch(string $url, bool $contents = true, bool $rebuild = false) : string|false {
+	protected function fetch(string $url, bool $contents = true, bool $rebuild = false, array $options = []) : string|false {
 		$cache = $this->config['cache'];
 		$local = null;
 		$file = false;
@@ -123,7 +125,7 @@ class browsers {
 				}
 			}
 			$context = \stream_context_create([
-				'http' => [
+				'http' => \array_merge([
 					'user_agent' => 'Mozilla/5.0 (compatible; Hexydec Browser Versions Bot/1.0; +https://github.com/hexydec/versions/)',
 					'header' => [
 						'Sec-Fetch-Dest: document',
@@ -134,7 +136,7 @@ class browsers {
 						'Cache-Control: no-cache',
 						'Accept-Language: en-GB,en;q=0.5'
 					]
-				]
+				], $options)
 			]);
 			if ($contents) {
 				if (($file = \file_get_contents($url, false, $context)) !== false) {
@@ -182,14 +184,15 @@ class browsers {
 		return false;
 	}
 
-	protected function getChromeVersions(bool $rebuild = false) : array|false {
+	protected function getChromeVersions(bool $rebuild = false, array $existing = []) : array|false {
 		$items = $rebuild ? 1000 : 20;
 		$url = 'https://chromiumdash.appspot.com/fetch_releases?channel=Stable&platform=Windows&num='.$items.'&offset=';
 		$chrome = [];
 		for ($i = 0; $i < 10; $i++) {
 			if (($data = $this->getFromJson($url.($i * $items), ['version'], ['time'], $rebuild)) !== false) {
-				$chrome = \array_merge($chrome, \array_map(fn (int $time) : int => \intval(\date('Ymd', \intval($time / 1000))), $data));
-				if (\count($data) < $items || !$rebuild) {
+				$page = \array_map(fn (int $time) : int => \intval(\date('Ymd', \intval($time / 1000))), $data);
+				$chrome = \array_merge($chrome, $page);
+				if (\count($data) < $items || (!$rebuild && \count(\array_intersect_key($page, $existing)) > 0)) {
 					break;
 				}
 			} else {
@@ -366,30 +369,14 @@ class browsers {
 	}
 
 	protected function getOperaVersions(bool $rebuild = false) : array|false {
-		$url = 'https://en.wikipedia.org/wiki/History_of_the_Opera_web_browser';
-		$data = [];
+		$data = $rebuild ? ($this->getOperaClassicVersions($rebuild) ?: []) : [];
 
-		// get classic opera versions
-		if ($rebuild && ($data = $this->getOperaClassicVersions($rebuild)) === false) {
-
-		// get current versions
-		} elseif (($html = $this->fetch($url, true, $rebuild)) !== false) {
-			$obj = new \hexydec\html\htmldoc();
-			if ($obj->load($html)) {
-				foreach ($obj->find('p') AS $row) {
-					$text = $row->text();
-
-					// match "Opera XXX was released on Month XXst, XXXX"
-					if (\preg_match('/Opera ([0-9]++) was released on ([a-z]++ [0-9]++, [0-9]{4})/i', $text, $match)) {
-						$date = new \DateTime($match[2]);
-						$data[$match[1]] = \intval($date->format('Ymd'));
-
-					// match Month XXst, XXXX, [some text] Opera XXX was released.
-					} elseif (\preg_match('/([a-z]++ [0-9]++, [0-9]{4}), [a-z ]*Opera ([0-9]++)(?:\.0)? was released\./i', $text, $match)) {
-						$date = new \DateTime($match[1]);
-						$data[$match[2]] = \intval($date->format('Ymd'));
-					}
-				}
+		// directory listing of all desktop Opera releases
+		$url = 'https://get.geo.opera.com/ftp/pub/opera/desktop/';
+		if (($html = $this->fetch($url, true, $rebuild)) !== false &&
+			\preg_match_all('/href="([0-9][0-9.]+)\/"[^>]*>[^<]*<\/a>\s+([0-9]{2}-[A-Za-z]+-[0-9]{4})/i', $html, $matches)) {
+			foreach ($matches[1] AS $i => $version) {
+				$data[$version] = \intval((new \DateTime($matches[2][$i]))->format('Ymd'));
 			}
 		}
 		return $data ?: false;
@@ -397,11 +384,88 @@ class browsers {
 
 	protected function getBraveVersions(bool $rebuild = false) : array|false {
 		$data = [];
-		$url = 'https://versions.brave.com/latest/brave-versions.json';
-		if (($file = $this->fetch($url, true, $rebuild)) !== false && ($json = \json_decode($file)) !== null) {
-			foreach ($json AS $item) {
-				if ($item->channel === 'release') {
-					$data[$item->name] = \intval(\str_replace('-', '', \substr($item->published, 0, 10)));
+
+		// get from rolling brave version normally
+		if (!$rebuild) {
+			$url = 'https://versions.brave.com/latest/brave-versions.json';
+			if (($file = $this->fetch($url, true, $rebuild)) !== false && ($json = \json_decode($file)) !== null) {
+				foreach ($json AS $item) {
+					if ($item->channel === 'release') {
+						$data[$item->name] = \intval(\str_replace('-', '', \substr($item->published, 0, 10)));
+					}
+				}
+			}
+
+		// fetch from github on rebuild
+		} else {
+			$data = $this->getGithubReleases('brave', 'brave-browser', 'Release ', $rebuild);
+		}
+		return $data ?: false;
+	}
+
+	protected function getGithubReleases(string $user, string $repo, ?string $filter = null, bool $rebuild = false) : array|false {
+		$data = [];
+
+		// fetch from github on rebuild
+		if (($token = $this->config['githubtoken']) !== null) {
+			$cursor = null;
+			do {
+
+				// prepare query
+				$query = 'query{repository(owner:"'.$user.'",name:"'.$repo.'"){releases(first:100'.($cursor !== null ? ',after:"'.$cursor.'"' : '').',orderBy:{field:CREATED_AT,direction:DESC}){pageInfo{hasNextPage endCursor}nodes{name tagName publishedAt}}}}';
+				$options = [
+					'method' => 'POST',
+					'header' => [
+						'Content-Type: application/json',
+						'Authorization: Bearer '.$token,
+					],
+					'content' => \json_encode(['query' => $query])
+				];
+
+				// reset cursor
+				$cursor = null;
+
+				// fetch response
+				if (($response = $this->fetch('https://api.github.com/graphql', true, $rebuild, $options)) === false) {
+					
+				// decode JSON
+				} elseif (($json = \json_decode($response)) === null) {
+					
+				// check releases are set
+				} elseif (!isset($json->data->repository->releases)) {
+					
+				// extract data
+				} else {
+					$releases = $json->data->repository->releases;
+					foreach ($releases->nodes AS $node) {
+						if ($filter === null || \str_starts_with($node->name, $filter)) {
+							$data[\ltrim($node->tagName, 'v')] = \intval((new \DateTime($node->publishedAt))->format('Ymd'));
+						}
+					}
+					if ($releases->pageInfo->hasNextPage) {
+						$cursor = $releases->pageInfo->endCursor;
+					}
+				}
+			} while ($cursor !== null);
+
+		} else {
+
+			// REST API fallback — capped at 1000 total releases across all channels
+			$page = 1;
+			while (true) {
+				$url = 'https://api.github.com/repos/'.$user.'/'.$repo.'/releases?per_page=100&page='.$page;
+				if (($file = $this->fetch($url, true, $rebuild)) !== false && ($json = \json_decode($file)) !== null && \is_array($json) && $json !== []) {
+					foreach ($json AS $item) {
+						if (\str_starts_with($item->name, 'Release ')) {
+							$data[\ltrim($item->tag_name, 'v')] = \intval((new \DateTime($item->published_at))->format('Ymd'));
+						}
+					}
+					if (\count($json) < 100) {
+						break;
+					}
+					$page++;
+				} else {
+					break;
 				}
 			}
 		}
@@ -426,7 +490,11 @@ class browsers {
 	}
 
 	protected function getMaxthonVersions(bool $rebuild = false) : array|false {
-		$data = [];
+		
+		// get from github first
+		$data = $this->getGithubReleases('maxthon', 'Maxthon', null, $rebuild) ?: [];
+		
+		// backup from their website
 		$url = 'https://www.maxthon.com/history';
 		if (($html = $this->fetch($url, true, $rebuild)) !== false) {
 			$obj = new \hexydec\html\htmldoc();
@@ -462,16 +530,23 @@ class browsers {
 	}
 
 	protected function getSamsungInternetVersions(bool $rebuild = false) : array|false {
-		$url = 'https://developer.samsung.com/internet/release-note.html';
+		$urls = [
+			'https://developer.samsung.com/internet/release-note.html',
+			'https://developer.samsung.com/internet/release-note/windows-release-note.html',
+			'https://developer.samsung.com/internet/release-note/android-release-note.html'
+		];
 		$data = [];
-		if (($html = $this->fetch($url, true, $rebuild)) !== false) {
-			$obj = new \hexydec\html\htmldoc();
-			if ($obj->load($html)) {
-				foreach ($obj->find('button') AS $row) {
-					$text = $row->find('span.txt')->text();
-					$date = $row->find('small.date')->text();
-					if ($date !== '' && \preg_match('/([0-9]+(?:\.[0-9]+)+)$/', \trim($text), $match)) {
-						$data[$match[1]] = \intval((new \DateTime($date))->format('Ymd'));
+		foreach ($urls AS $url) {
+			if (($html = $this->fetch($url, true, $rebuild)) !== false) {
+				$obj = new \hexydec\html\htmldoc();
+				if ($obj->load($html)) {
+					foreach ($obj->find('button') AS $row) {
+						$text = $row->find('span.txt')->text();
+						$date = $row->find('small.date')->text();
+						if ($date !== '' && \str_starts_with($text, 'Samsung Internet') && \preg_match('/([0-9]+(?:\.[0-9]+)+)$/', \trim($text), $match)) {
+							$date = (\substr_count($date, ' ') === 1 ? '1st ' : '').\str_replace(',', '', $date);
+							$data[$match[1]] = \intval((new \DateTime($date))->format('Ymd'));
+						}
 					}
 				}
 			}
@@ -520,11 +595,11 @@ class browsers {
 				$obj = new \hexydec\html\htmldoc();
 				if ($obj->load($html)) {
 					foreach ($obj->find('.content-list > li') AS $row) {
-						$title = \ltrim($row->find('a.gl-font-bold')->text(), 'v');
+						$title = \ltrim($row->find('h2 > a')->text(), 'v');
 						$date = new \DateTime($row->find('time')->attr('datetime'));
 						$data[$title] = \intval($date->format('Ymd'));
 					}
-					$path = $rebuild ? $obj->find('a[rel=next]')->attr('href') : null;
+					$path = $rebuild || true ? $obj->find('a[rel=next]')->attr('href') : null;
 				} else {
 					break;
 				}
@@ -550,8 +625,10 @@ class browsers {
 
 	protected function getPalemoonVersions(bool $rebuild = false) : array|false {
 		$data = [];
-		$url = 'https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases.rss';
-		if (($xml = $this->fetch($url, true, $rebuild)) !== false && ($obj = \simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOERROR | LIBXML_NOWARNING)) !== false) {
+		// $url = 'https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases.rss';
+		// if (($xml = $this->fetch($url, true, $rebuild)) !== false && ($obj = \simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOERROR | LIBXML_NOWARNING)) !== false) {
+		$file = \dirname(__DIR__).'/source/palemoon-releases.rss';
+		if (($obj = \simplexml_load_file($file, 'SimpleXMLElement', LIBXML_NOERROR | LIBXML_NOWARNING)) !== false) {
 			foreach ($obj->xpath('//channel/item') AS $item) {
 				$data[\mb_substr((string) $item->title, 10)] = \intval((new \DateTime((string) $item->pubDate))->format('Ymd'));
 			}
