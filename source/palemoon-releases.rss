@@ -3,7 +3,214 @@
     <title>Releases for MoonchildProductions/Pale-Moon</title>
     <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/release</link>
     <description></description>
-    <pubDate>Mon, 12 Jan 2026 16:34:22 +0000</pubDate>
+    <pubDate>Tue, 05 May 2026 23:33:44 +0000</pubDate>
+    <item>
+      <title>Pale Moon 34.2.2</title>
+      <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.2.2_Release</link>
+      <description></description>
+      <content:encoded><![CDATA[<p dir="auto">This is a stability and security release.</p>
+<p dir="auto"><strong>Changes/fixes:</strong></p>
+<ul dir="auto">
+<li>Fixed a regression in 34.2.1 that would cause crashes to desktop when using certain extensions or visiting certain websites.</li>
+<li>Fixed potential security issues with audio channel mixing, MP3 decoding (DiD), international text display, DOM workers (DiD), reading of files (DiD), and the ANGLE graphics library.</li>
+</ul>
+]]></content:encoded>
+      <author>Moonchild</author>
+      <guid>120129: https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.2.2_Release</guid>
+      <pubDate>Thu, 30 Apr 2026 13:49:03 +0000</pubDate>
+    </item>
+    <item>
+      <title>Pale Moon 34.2.1</title>
+      <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.2.1_Release</link>
+      <description></description>
+      <content:encoded><![CDATA[<p dir="auto">This is a bugfix and security release.<br/>
+Note for FreeBSD users: our binaries from this version forward require FreeBSD v14 or later.</p>
+<p dir="auto"><strong>Changes/fixes:</strong></p>
+<ul dir="auto">
+<li>Fixed a regression leading to cursive languages (where multiple characters combine) not being rendered correctly (e.g. Arabic).</li>
+<li>Updated our cookie magic prefix handling, adding __Http- and __Host-Http- magic prefixes and aligning our implementation with RFC 6265bis.</li>
+<li>Updated our Brotli library to 1.2.0+ (1.2.0 with additional fixes).</li>
+<li>Updated NSS to 3.90.10.0 (UXP). For clarity, the version now carries the (UXP) label to distinguish this fork (which has additional mitigations) from the 3.90 branch of NSS maintained by Mozilla.</li>
+<li>A large audit of security issues was performed. Many security issues were addressed, including potential crash scenarios and code correctness issues.<br/>
+As a summary: 50 potential vulnerabilities were found applicable and fixed, 20 issues had DiD code changes applied, and 4 were already mitigated by us before being reported.<br/>
+Of the reported vulnerabilities, 270 were not applicable to our code (with the vast majority pertaining to e10s/multi-process browser architecture) and 6 low-impact ones were marked for further investigation at a later time.</li>
+</ul>
+]]></content:encoded>
+      <author>Moonchild</author>
+      <guid>120124: https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.2.1_Release</guid>
+      <pubDate>Tue, 28 Apr 2026 05:50:15 +0000</pubDate>
+    </item>
+    <item>
+      <title>Pale Moon 34.2.0</title>
+      <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.2.0_Release</link>
+      <description></description>
+      <content:encoded><![CDATA[<p dir="auto">This is a development, bugfix and security update.</p>
+<p dir="auto"><strong>New features:</strong></p>
+<ul dir="auto">
+<li>Implemented ES2018 Proxy <code>ownKeys</code> duplicate-key invariant.</li>
+<li>Implemented ES2022 <code>Error.cause</code> property.</li>
+<li>Implemented support for <code>oklab</code> and <code>oklch</code> color spaces in CSS.</li>
+<li>Implemented ES2024 <code>object.GroupBy</code>.</li>
+<li>Implemented the remainder of the ES2023 Change Array by Copy proposal (<code>toSpliced()</code>, <code>with()</code>, and <code>TypedArray</code> versions of <code>toReversed()</code>, <code>toSorted()</code> and <code>with()</code>).</li>
+<li>Implemented <code>AudioNode</code> constructors.</li>
+<li>Implemented support for nested CSS grammar.</li>
+<li>Implemented the <code>window.MathMLElement</code> global.</li>
+</ul>
+<p dir="auto"><strong>Changes/fixes:</strong></p>
+<ul dir="auto">
+<li>Fixed a crash related to <code>WeakRef</code> use.</li>
+<li>Fixed stack exhaustion crashes as a result of top-level <code>await</code> in modules.</li>
+<li>Updated our expat parser library to 2.7.4, fixing various issues.</li>
+<li>Updated <code>url.CanParse()</code> to allow custom schemes.</li>
+<li>Updated <code>document.currentScript</code> to align with the currently used spec.</li>
+<li>Fixed a crash due to infinite recursion.</li>
+<li>Fixed a crash on MacOS due to WebGL attribute arrays.</li>
+<li>Fixed a crash related to <code>pointer</code> @media queries in CSS.</li>
+<li>Fixed a crash related to the spellchecker when handling input fields in Shadow DOM.</li>
+<li>Future-proofed whitespace handling in <code>ParseDate</code> in light of Unicode variable whitespace use.</li>
+<li>Removed irrelevant plugin preferences when plugin support isn&#39;t built into the browser (non-standard builds/forks).</li>
+<li>Improved support for the mimalloc memory allocator.</li>
+<li>Improved support for LoongArch CPUs.</li>
+<li>Added special handling for certain MacOS system fonts.</li>
+<li>Removed leftover code for unsupported Itanium, 32-bit Sparc and other old architectures.</li>
+<li>Added a workaround for CloudFlare image resizing, since it requires more opaque URL handling to function.<br/>
+This workaround is controlled with the new preference <code>network.url.cloudflare_image_resizing.enabled</code> (default true). See implementation notes.</li>
+<li>Security issues addressed: CVE-2026-4707 (DiD), CVE-2026-4690 (DiD), CVE-2026-4727 (DiD), and others without a CVE designation.<br/>
+A note that Mozilla-relevant security issues CVE-2025-59375 and CVE-2026-4726 had already been addressed in the browser before this release.</li>
+</ul>
+<p dir="auto"><strong>Implementation notes:</strong></p>
+<ul dir="auto">
+<li>CloudFlare offers an image resizing service to its clients, which takes a complex string in the URL to control the resizing process. The workaround implemented in this version will treat anything after <code>/cdn-cgi/image/</code> as opaque path data (on all websites, considering the wide-spread nature of CloudFlare as a CDN, on many top-level domains). Without this workaround, image resizing like this does not work and results in HTTP 403 (forbidden) errors.<br/>
+This workaround does break with our normal way of parsing URLs, so if it causes trouble with sites with this particular path prefix, try changing the preference (to false, to disable this workaround) and see if it helps, and let us know (on the forum or repo).</li>
+</ul>
+]]></content:encoded>
+      <author>Moonchild</author>
+      <guid>120090: https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.2.0_Release</guid>
+      <pubDate>Mon, 06 Apr 2026 08:41:23 +0000</pubDate>
+    </item>
+    <item>
+      <title>Pale Moon 34.1.0</title>
+      <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.1.0_Release</link>
+      <description></description>
+      <content:encoded><![CDATA[<p dir="auto">This is an important update landing technological enhancements previously intended to be in the v34.0 milestone.</p>
+<p dir="auto"><strong>New features:</strong></p>
+<ul dir="auto">
+<li>Re-landed Xoroshiro128++ JavaScript PRNG to make it more robust while keeping high performance.<br/>
+This was previously backed out due to intermittent issues and crashes.</li>
+<li>Implemented JavaScript <code>SubmitEvent</code> support for HTML forms.</li>
+<li>Implemented JavaScript <code>requestSubmit()</code> for HTML forms.</li>
+<li>Implemented JavaScript <code>toSorted()</code>.</li>
+<li>Implemented JavaScript <code>toReversed()</code>.</li>
+<li>Implemented top-level <code>await</code> support for JavaScript modules. See implementation notes.</li>
+<li>Implemented <code>pointer</code> and <code>hover</code> CSS media queries.</li>
+<li>Enabled hardware-accelerated decoding for VP9 videos (where possible).</li>
+</ul>
+<p dir="auto"><strong>Changes/fixes:</strong></p>
+<ul dir="auto">
+<li>Re-landed our expat library update, with fixes for large attribute parsing.</li>
+<li>Updated the JPEG-XL library to 0.11.2 to pick up security and performance fixes, and applied a spot-fix for big-endian hardware.</li>
+<li>Updated libtheora to 1.2.0.</li>
+<li>Updated libvpx to 1.16.0 with various fixes to retain compatibility with older MacOS and PowerPC platforms.</li>
+<li>Pale Moon, from this version forward, allows unencrypted websocket connections to localhost addresses even when the calling document was served encrypted.</li>
+<li>Fixed an issue in the new Cascade Layers implementation causing problems with UI elements and extensions.</li>
+<li>Fixed several issues with the new ICU library implementation in UXP:
+<ul dir="auto">
+<li>Fixed an issue where it was returning unexpected Unicode spaces in date strings instead of standard space characters, causing problems with web scripting.</li>
+<li>Fixed an issue with plural forms for Shuar, Welsh and several Slavic languages.</li>
+<li>Fixed an issue with letter dots in Lithuanian.</li>
+<li>Fixed an issue with word-wrapping in Tibetan.</li>
+</ul>
+</li>
+<li>Fixed an intermittent browser crash related to removing cached image data, and improved image data cache handling as a whole.</li>
+<li>Further improved compatibility with Mac on PowerPC hardware.</li>
+<li>Restored support for building on 32-bit MacOS 10.6.</li>
+<li>Applied miscellaneous fixes for building on MacOS 10.5 (Leopard) and 10.6 (Snow Leopard).</li>
+<li>Fixed run-time issues on FreeBSD 15.*.</li>
+<li>Fixed an issue with applying image filters on big-endian hardware.</li>
+<li>Fixed an issue preventing bundled fonts from working properly on targets other than Windows or Linux-GTK.</li>
+<li>Enabled <code>PerformanceObservers</code> by default. See implementation notes.</li>
+<li>Security issues addressed: CVE-2026-2806 (DiD), CVE-2026-2758, CVE-2026-2804, CVE-2026-2787 (DiD), CVE-2026-2757, CVE-2026-2773, CVE-2026-2779 (DiD), CVE-2026-2775, and several others that do not have a CVE designation.</li>
+</ul>
+<p dir="auto"><strong>Implementation notes:</strong></p>
+<ul dir="auto">
+<li>Top-level <code>await</code> for JavaScript modules has been implemented. This allows the use of the <code>await</code> keyword at the top level without a wrapper to force pseudo-synchronous processing in async modules. This completes the last landmark issue of our ES2022 compatibility. Most notably, the lack of this would result in websites using certain frameworks to render completely blank. Many thanks to the maintainer of Basilisk for getting this implementation done for UXP.</li>
+<li><code>PerformanceObservers</code> is a web-development focused API that allows detailed timings to be recorded from web pages. While intended for debugging performance bottlenecks and similar by web developers, more and more websites have been using them in production sites (primarily for analytics but in more than a few instances also for base functionality of the websites). Pale Moon has had the option to enable them on a case-by-case basis (in Preferences -&gt; Privacy, the &#34;Tracking&#34; tab) where needed, but was kept disabled by default due to the obvious privacy impact of having this API available to all sites. Unfortunately, this has become such a web compatibility issue by now that we&#39;ve had to enable them by default.</li>
+</ul>
+]]></content:encoded>
+      <author>Moonchild</author>
+      <guid>119773: https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.1.0_Release</guid>
+      <pubDate>Tue, 03 Mar 2026 08:13:02 +0000</pubDate>
+    </item>
+    <item>
+      <title>Pale Moon 34.0.1</title>
+      <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.0.1_Release</link>
+      <description></description>
+      <content:encoded><![CDATA[<p dir="auto">This is a minor release to address some critical issues in the new milestone.</p>
+<p dir="auto"><strong>Changes/fixes:</strong></p>
+<ul dir="auto">
+<li>Backed out the expat library update for causing memory inflation and browser hang issues on XUL/XML and SVG files with particularly large attributes.</li>
+<li>Backed out the change of the Javascript PRNG for causing intermittent issues and crashes on 32-bit platforms.</li>
+</ul>
+<p dir="auto">Both of these issues are being investigated and can hopefully re-land with the next development release.</p>
+]]></content:encoded>
+      <author>Moonchild</author>
+      <guid>117444: https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.0.1_Release</guid>
+      <pubDate>Wed, 21 Jan 2026 10:02:35 +0000</pubDate>
+    </item>
+    <item>
+      <title>Pale Moon 34.0.0</title>
+      <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.0.0_Release</link>
+      <description></description>
+      <content:encoded><![CDATA[<p dir="auto">This is a new milestone release! There are many changes in this milestone; the most important ones are highlighted here.</p>
+<p dir="auto"><strong>New features:</strong></p>
+<ul dir="auto">
+<li>Our default theme on Windows received a refresh and update. It should integrate better with Windows 11 now, and be more responsive to dark accent colors, among other things.</li>
+<li>Implemented <code>WeakRef</code>. See implementation notes.</li>
+<li>Implemented <code>URL.canParse()</code>.</li>
+<li>Implemented the <code>inset-block</code> and <code>inset-inline</code> CSS shorthands.</li>
+<li>Added a preference (<code>privacy.forgetaboutsite.clearPasswords</code>) to control clearing of passwords when using &#34;forget about this site&#34; in the permissions manager, and disabled clearing of passwords by default, since it was considered unexpected behavior by the community.</li>
+<li>Changed our JavaScript PRNG to Xoroshiro128++ to make it more robust while keeping high performance.</li>
+</ul>
+<p dir="auto"><strong>Important updates and fixes:</strong></p>
+<ul dir="auto">
+<li>Re-landed CSS Cascade Layers support after the previous back-out.</li>
+<li>Re-landed CSS <code>color-mix</code> support after the previous back-out. RGB and HSL color spaces only, like previous.</li>
+<li>Implemented viewport overflow propagation logic. See implementation notes.</li>
+<li>Unprefixed CSS <code>-moz-appearance</code>; Pale Moon now accepts the unprefixed CSS <code>appearance</code> keyword. For compatibility, <code>-moz-appearance</code> and <code>-webkit-appearance</code> (if enabled) have been retained, although the long-term plan is to eventually remove the <code>-moz</code> prefixed one, so if you are an extension or theme developer, please consider switching your CSS to use <code>appearance</code> without a prefix.</li>
+<li>Fixed an intermittent but fairly prominent crash-to-desktop due to JavaScript garbage collection on certain modern sites.</li>
+<li>Fixed a crash on sites with certain types of CSP handling.</li>
+<li>Fixed a crash in WASM.</li>
+<li>Updated NSS to 3.90.9 (custom) to pick up several security and stability fixes.</li>
+<li>Updated ICU to v78.1. This is a major uplift for our internationalization subsystem, allowing further future developments for the Internationalization API.</li>
+<li>Updated Emoji support to Unicode 17.</li>
+<li>Updated our expat parser code to a more recent version (2.7.3), fixing various issues.</li>
+<li>Improved handling and rendering of emoji clusters.</li>
+</ul>
+<p dir="auto"><strong>Other changes:</strong></p>
+<ul dir="auto">
+<li>Added support for building on Sparc64 hardware.</li>
+<li>Added support for building for NetBSD on Alpha.</li>
+<li>Added basic support for building on Mac PowerPC (still a work in progress).</li>
+<li>Added basic support for building on LoongArch64 hardware (龍芯 CPUs).</li>
+<li>Added support for running on FreeBSD 15.</li>
+<li>Removed automatic coloring of auto-filled login fields as it would interfere with various browser and system color schemes.<br/>
+If preferred, this can be reinstated by users with a userContent.css document or e.g. the Stylem extension by leveraging the :autofill CSS pseudo-class.</li>
+<li>Restored support for in-process NPAPI plugins, allowing plugin use on systems where out-of-process is undesirable.</li>
+<li>Improved JavaScript IonMonkey stability on ARM and Mac SoC hardware.</li>
+<li>Linux GTK builds now always build with gio, and gconf support has been removed.</li>
+<li>Security issues addressed: CVE-2025-13015, CVE-2026-0879 (DiD), CVE-2026-0880 (DiD), CVE-2026-0889 (DiD), CVE-2026-0883, CVE-2026-0886 (DiD), and several others without a CVE designation.</li>
+</ul>
+<p dir="auto"><strong>Implementation notes:</strong></p>
+<ul dir="auto">
+<li>This milestone implements <code>WeakRef</code> in the platform in 2 modes, controlled by a new preference <code>javascript.options.weakrefs</code>. In the default mode (<code>false</code>), <code>WeakRef</code> does not allow page content to reach into the JavaScript engine to coerce garbage collection, while still offering the front-end API to web content (effectively creating a stub). The other mode (<code>true</code>) allows this coersion and gives potentially malicious web scripting some* control over the JavaScript garbage collector. It is not recommended to set this to <code>true</code> for general use. <em>Only enable this if your situation is running trusted code and explicitly requires nudging the JavaScript engine to dereference objects.</em> We resisted having this strongly discouraged and potentially dangerous API at all, but some sites started to use <code>WeakRef</code> unconditionally and breaking without the API front-end, so this compromise was implemented, leaving control in the hands of the user.<br/>
+(*) The spec only allows for code to hint/coerce and does not guarantee if or when dereferencing happens.</li>
+<li>A number of sites (including some top Internet sites) have started using overflow-x: clip without overflow-y on full-document elements (document root/&lt;html&gt; or ). While doing this makes little to no logical sense, our strict implementation of clip (since 33.9.0, also see the implementation notes there) would, as a result, create unscrollable pages.There is some special logic for this (viewport overflow propagation) described in the relevant drafts which we have now implemented, updating our overflow: clip implementation to avoid the previously problematic strict behaviour in these particular cases.</li>
+</ul>
+]]></content:encoded>
+      <author>Moonchild</author>
+      <guid>117440: https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.0.0_Release</guid>
+      <pubDate>Mon, 19 Jan 2026 18:47:28 +0000</pubDate>
+    </item>
     <item>
       <title>Pale Moon 33.9.1</title>
       <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/33.9.1_Release</link>

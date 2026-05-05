@@ -24,11 +24,13 @@ jobs:
       - name: Install Composer
         uses: php-actions/composer@v6
         with:
-            php_version: 8.3
+            php_version: 8.4
             php_extensions: mbstring xdebug
 
       - name: Build
         run: php src/build.php
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:

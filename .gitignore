@@ -1,2 +1,5 @@
 /vendor/
 /cache
+/.phpunit.cache
+/coverage
+/env.php
