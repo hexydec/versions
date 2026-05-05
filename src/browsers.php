@@ -31,18 +31,18 @@ class browsers {
 			'ucbrowser' => [$this, 'getUcBrowserVersions'],
 			// 'silk' => [$this, 'getSilkBrowserVersions'],
 			'waterfox' => [$this, 'getWaterfoxVersions'],
-			'palemoon' => [$this, 'getPaleMoonVersions'],
+			'palemoon' => [$this, 'getPalemoonVersions'],
 			'oculus' => [$this, 'getOculusBrowserVersions'],
 			'midori' => [$this, 'getMidoriVersions']
 		];
 
-		// read existing file
-		if ($rebuild || !\file_exists($target)) {
+		// read existing file as baseline (preserved for sources that fail to fetch on rebuild)
+		if (!\file_exists($target)) {
 			$data = [];
 		} elseif (($json = \file_get_contents($target)) === false) {
 			\trigger_error('Could not read file', E_USER_WARNING);
 			$data = [];
-		} elseif (($data = \json_decode($json, true)) === false) {
+		} elseif (($data = \json_decode($json, true)) === null) {
 			\trigger_error('Data is not valid JSON', E_USER_WARNING);
 			$data = [];
 		}
@@ -52,15 +52,16 @@ class browsers {
 		$total = 0;
 		foreach ($browsers AS $key => $item) {
 			if (($results = \call_user_func($item, $rebuild)) !== false) {
-				$new = $rebuild ? $results : \array_diff_key($results, $data[$key]);
+				$existing = $data[$key] ?? [];
+				$new = $rebuild ? $results : \array_diff_key($results, $existing);
 				$count = \count($new);
 				$this->msg('Found '.$count.' for '.\ucfirst($key));
-				$data[$key] = $rebuild ? $results : \array_replace($data[$key], $results);
+				$data[$key] = $rebuild ? $results : \array_replace($existing, $results);
 				\arsort($data[$key]);
 				$added += $count;
 				$total += \count($data[$key]);
 			} else {
-				\trigger_error('Could not generate versions for '.\ucfirst($key), E_USER_WARNING);
+				$this->msg('Warning: Could not generate versions for '.\ucfirst($key));
 			}
 		}
 
@@ -91,9 +92,10 @@ class browsers {
 		\call_user_func($this->config['msg'] ?? function (string $msg) : void {echo $msg."\n";}, $msg);
 	}
 
-	protected function fetch(string $url, bool $contents = true) : string|false {
+	protected function fetch(string $url, bool $contents = true, bool $rebuild = false) : string|false {
 		$cache = $this->config['cache'];
 		$local = null;
+		$file = false;
 
 		// generate cache file name
 		if ($cache !== null) {
@@ -101,7 +103,7 @@ class browsers {
 		}
 
 		// fetch from local cache
-		if ($local !== null && \file_exists($local) && (!$contents || ($file = \file_get_contents($local)) !== false)) {
+		if (!$rebuild && $local !== null && \file_exists($local) && (!$contents || ($file = \file_get_contents($local)) !== false)) {
 			return $contents ? $file : $local;
 
 		// download file
@@ -113,7 +115,8 @@ class browsers {
 			}
 
 			// save timing
-			if (($host = \parse_url($url, PHP_URL_HOST)) !== false) {
+			$host = \parse_url($url, PHP_URL_HOST);
+			if ($host !== false && $host !== null) {
 				$wait = 2;
 				if (isset($this->timing[$host]) && \microtime(true) < $this->timing[$host] + $wait) {
 					\sleep($wait);
@@ -135,7 +138,7 @@ class browsers {
 			]);
 			if ($contents) {
 				if (($file = \file_get_contents($url, false, $context)) !== false) {
-				
+
 					// save to local file
 					if ($local !== null) {
 						\file_put_contents($local, $file);
@@ -148,14 +151,15 @@ class browsers {
 					$file = false;
 				}
 			}
-			$this->timing[$host] = \microtime(true);
+			if ($host !== false && $host !== null) {
+				$this->timing[$host] = \microtime(true);
+			}
 			return $file;
 		}
-		return false;
 	}
 
-	protected function getFromJson(string $url, array $version, array $date) {
-		if (($file = $this->fetch($url)) !== false && ($json = \json_decode($file)) !== null && !empty($json)) {
+	protected function getFromJson(string $url, array $version, array $date, bool $rebuild = false) : array|false {
+		if (($file = $this->fetch($url, true, $rebuild)) !== false && ($json = \json_decode($file)) !== null && !empty($json)) {
 			$data = [];
 			foreach ($json AS $item) {
 				$row = [
@@ -183,7 +187,7 @@ class browsers {
 		$url = 'https://chromiumdash.appspot.com/fetch_releases?channel=Stable&platform=Windows&num='.$items.'&offset=';
 		$chrome = [];
 		for ($i = 0; $i < 10; $i++) {
-			if (($data = $this->getFromJson($url.($i * $items), ['version'], ['time'])) !== false) {
+			if (($data = $this->getFromJson($url.($i * $items), ['version'], ['time'], $rebuild)) !== false) {
 				$chrome = \array_merge($chrome, \array_map(fn (int $time) : int => \intval(\date('Ymd', \intval($time / 1000))), $data));
 				if (\count($data) < $items || !$rebuild) {
 					break;
@@ -197,7 +201,7 @@ class browsers {
 
 	protected function getFirefoxVersions(bool $rebuild = false) : array|false {
 		$url = 'https://whattrainisitnow.com/calendar/';
-		if (($html = $this->fetch($url)) !== false) {
+		if (($html = $this->fetch($url, true, $rebuild)) !== false) {
 			$data = [];
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($html)) {
@@ -239,7 +243,7 @@ class browsers {
 
 		// this is the most up to date page
 		$url = 'https://learn.microsoft.com/en-us/deployedge/microsoft-edge-release-schedule';
-		if (($html = $this->fetch($url)) !== false) {
+		if (($html = $this->fetch($url, true, $rebuild)) !== false) {
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($html)) {
 				foreach ($obj->find('table > tbody > tr') AS $row) {
@@ -253,7 +257,7 @@ class browsers {
 
 		// this has all the previous chromium builds
 		$url = 'https://learn.microsoft.com/en-us/deployedge/microsoft-edge-relnote-archive-stable-channel';
-		if ($rebuild && ($html = $this->fetch($url)) !== false) {
+		if ($rebuild && ($html = $this->fetch($url, true, $rebuild)) !== false) {
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($html)) {
 				$year = null;
@@ -307,7 +311,7 @@ class browsers {
 
 	protected function getSafariVersions(bool $rebuild = false) : array|false {
 		$url = 'https://developer.apple.com/tutorials/data/documentation/safari-release-notes.json';
-		if (($file = $this->fetch($url)) !== false && ($json = \json_decode($file)) !== null) {
+		if (($file = $this->fetch($url, true, $rebuild)) !== false && ($json = \json_decode($file)) !== null) {
 			$data = $rebuild ? $this->getLegacySafariVersions() : [];
 			foreach ($json->references AS $item) {
 				$text = $item->abstract[0]->text;
@@ -321,7 +325,7 @@ class browsers {
 		return false;
 	}
 
-	protected function getInternetExplorerVersions() {
+	protected function getInternetExplorerVersions() : array {
 		return [
 			'1' => 19950724,
 			'2' => 19951127,
@@ -345,7 +349,7 @@ class browsers {
 
 	protected function getOperaClassicVersions(bool $rebuild = false) : array|false {
 		$url = 'https://help.opera.com/en/operas-archived-history/';
-		if (($html = $this->fetch($url)) !== false) {
+		if (($html = $this->fetch($url, true, $rebuild)) !== false) {
 			$data = [];
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($html)) {
@@ -366,10 +370,10 @@ class browsers {
 		$data = [];
 
 		// get classic opera versions
-		if ($rebuild && ($data = $this->getOperaClassicVersions()) === false) {
+		if ($rebuild && ($data = $this->getOperaClassicVersions($rebuild)) === false) {
 
 		// get current versions
-		} elseif (($html = $this->fetch($url)) !== false) {
+		} elseif (($html = $this->fetch($url, true, $rebuild)) !== false) {
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($html)) {
 				foreach ($obj->find('p') AS $row) {
@@ -392,9 +396,9 @@ class browsers {
 	}
 
 	protected function getBraveVersions(bool $rebuild = false) : array|false {
-		$data = $rebuild ? $this->getApkMirror('/uploads/?appcategory=brave-browser', 'Brave Private Web Browser, VPN ') : [];
+		$data = [];
 		$url = 'https://versions.brave.com/latest/brave-versions.json';
-		if (($file = $this->fetch($url)) !== false && ($json = \json_decode($file)) !== null) {
+		if (($file = $this->fetch($url, true, $rebuild)) !== false && ($json = \json_decode($file)) !== null) {
 			foreach ($json AS $item) {
 				if ($item->channel === 'release') {
 					$data[$item->name] = \intval(\str_replace('-', '', \substr($item->published, 0, 10)));
@@ -407,7 +411,7 @@ class browsers {
 	protected function getVivaldiVersions(bool $rebuild = false) : array|false {
 		$data = [];
 		$url = 'https://vivaldi.com/download/archive/?platform=win';
-		if (($html = $this->fetch($url)) !== false) {
+		if (($html = $this->fetch($url, true, $rebuild)) !== false) {
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($html)) {
 				foreach ($obj->find('tbody > tr') AS $row) {
@@ -416,7 +420,6 @@ class browsers {
 						$data[\substr($text, 8, -8)] = \intval(\str_replace('-', '', $row->find('td:first-child + td')->text()));
 					}
 				}
-				return $data;
 			}
 		}
 		return $data ?: false;
@@ -425,7 +428,7 @@ class browsers {
 	protected function getMaxthonVersions(bool $rebuild = false) : array|false {
 		$data = [];
 		$url = 'https://www.maxthon.com/history';
-		if (($html = $this->fetch($url)) !== false) {
+		if (($html = $this->fetch($url, true, $rebuild)) !== false) {
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($html)) {
 				foreach ($obj->find('.history-list-text') AS $row) {
@@ -436,50 +439,52 @@ class browsers {
 
 					}
 				}
-				return $data;
 			}
 		}
 		return $data ?: false;
 	}
 
-	protected function getApkMirror(string $path, string $prefix, bool $rebuild = false, array $not = []) : array|false {
+	protected function getFromUptodown(string $url, bool $rebuild = false) : array|false {
 		$data = [];
-		$len = \strlen($prefix);
-		while ($path !== null) {
-			if (($html = $this->fetch('https://www.apkmirror.com'.$path)) !== false) {
-				$obj = new \hexydec\html\htmldoc();
-				if ($obj->load($html)) {
-					foreach ($obj->find('.table-row') AS $row) {
-						$title = $row->find('a.fontBlack')->text();
-						if (\str_starts_with($title, $prefix)) {
-							$date = new \DateTime($row->find('.visible-xs .dateyear_utc')->eq(0)->text());
-							$version = \explode(' ', \substr($title, $len))[0];
-							if (!\in_array($version, $not)) {
-								$data[$version] = \intval($date->format('Ymd'));
-							}
-						}
+		if (($html = $this->fetch($url, true, $rebuild)) !== false) {
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				foreach ($obj->find('[data-version-id]') AS $row) {
+					$version = $row->find('span.version')->text();
+					$date = $row->find('span.date')->text();
+					if ($version !== '' && $date !== '') {
+						$data[$version] = \intval((new \DateTime($date))->format('Ymd'));
 					}
-					$path = $rebuild ? $obj->find('a[rel=next]')->attr('href') : null;
-				} else {
-					break;
 				}
-			} else {
-				break;
 			}
 		}
 		return $data ?: false;
 	}
 
 	protected function getSamsungInternetVersions(bool $rebuild = false) : array|false {
-		return $this->getApkMirror('/uploads/?appcategory=samsung-internet-for-android', 'Samsung Internet Browser ', $rebuild);
+		$url = 'https://developer.samsung.com/internet/release-note.html';
+		$data = [];
+		if (($html = $this->fetch($url, true, $rebuild)) !== false) {
+			$obj = new \hexydec\html\htmldoc();
+			if ($obj->load($html)) {
+				foreach ($obj->find('button') AS $row) {
+					$text = $row->find('span.txt')->text();
+					$date = $row->find('small.date')->text();
+					if ($date !== '' && \preg_match('/([0-9]+(?:\.[0-9]+)+)$/', \trim($text), $match)) {
+						$data[$match[1]] = \intval((new \DateTime($date))->format('Ymd'));
+					}
+				}
+			}
+		}
+		return $data ?: false;
 	}
 
 	protected function getHuaweiBrowserVersions(bool $rebuild = false) : array|false {
-		return $this->getApkMirror('/uploads/?appcategory=huawei-browser', 'HUAWEI Browser ', $rebuild, ['50.50.50.6']);
+		return $this->getFromUptodown('https://huawei-browser.en.uptodown.com/android/versions', $rebuild);
 	}
 
 	protected function getUcBrowserVersions(bool $rebuild = false) : array|false {
-		return $this->getApkMirror('/uploads/?appcategory=uc-browser', 'UC Browser-Safe, Fast, Private ', $rebuild);
+		return $this->getFromUptodown('https://uc-browser.en.uptodown.com/android/versions', $rebuild);
 	}
 
 	// protected function getSilkBrowserVersions(bool $rebuild = false) : array|false {
@@ -492,7 +497,7 @@ class browsers {
 	protected function getKmeleonVersions(bool $rebuild = false) : array|false {
 		$data = [];
 		$url = 'http://kmeleonbrowser.org/wiki/DownloadsArchive';
-		if (($html = $this->fetch($url)) !== false) {
+		if (($html = $this->fetch($url, true, $rebuild)) !== false) {
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($html)) {
 				foreach ($obj->find('.text-body h4') AS $row) {
@@ -511,7 +516,7 @@ class browsers {
 		$path = '/network/konqueror/-/tags';
 		$data = [];
 		while ($path !== null) {
-			if (($html = $this->fetch('https://invent.kde.org'.$path)) !== false) {
+			if (($html = $this->fetch('https://invent.kde.org'.$path, true, $rebuild)) !== false) {
 				$obj = new \hexydec\html\htmldoc();
 				if ($obj->load($html)) {
 					foreach ($obj->find('.content-list > li') AS $row) {
@@ -532,20 +537,12 @@ class browsers {
 
 	protected function getWaterfoxVersions(bool $rebuild = false) : array|false {
 		$data = [];
-		$url = 'https://www.waterfox.net/download/';
-		if (($html = $this->fetch($url)) === false) {
-
-		} elseif (($start = \mb_strpos($html, '(function(){const items = [{')) === false) {
-			
-		} elseif (($end = \mb_strpos($html, ';', $start)) === false) {
-
-		} elseif (($json = \mb_substr($html, $start + 26, $end - $start - 26)) === false) {
-			
-		} elseif (($items = \json_decode($json, true)) === null) {
-			
-		} else {
-			foreach ($items AS $item) {
-				$data[$item['label']] = \intval((new \DateTime($item['pubDate']))->format('Ymd'));
+		$url = 'https://www.waterfox.com/rss.xml';
+		if (($xml = $this->fetch($url, true, $rebuild)) !== false && ($obj = \simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOERROR | LIBXML_NOWARNING)) !== false) {
+			foreach ($obj->xpath('//channel/item') AS $item) {
+				if (\preg_match('/^Waterfox (\d[0-9.]+)/', (string) $item->title, $match)) {
+					$data[$match[1]] = \intval((new \DateTime((string) $item->pubDate))->format('Ymd'));
+				}
 			}
 		}
 		return $data ?: false;
@@ -554,8 +551,7 @@ class browsers {
 	protected function getPalemoonVersions(bool $rebuild = false) : array|false {
 		$data = [];
 		$url = 'https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases.rss';
-		if (($xml = $this->fetch($url)) !== false) {
-			$obj = \simplexml_load_string($xml);
+		if (($xml = $this->fetch($url, true, $rebuild)) !== false && ($obj = \simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOERROR | LIBXML_NOWARNING)) !== false) {
 			foreach ($obj->xpath('//channel/item') AS $item) {
 				$data[\mb_substr((string) $item->title, 10)] = \intval((new \DateTime((string) $item->pubDate))->format('Ymd'));
 			}
@@ -565,7 +561,7 @@ class browsers {
 
 	protected function getOculusBrowserVersions(bool $rebuild = false) : array|false {
 		$url = 'https://en.wikipedia.org/wiki/Meta_Quest_Browser';
-		if (($html = $this->fetch($url)) !== false) {
+		if (($html = $this->fetch($url, true, $rebuild)) !== false) {
 			$data = [];
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($html)) {
@@ -586,7 +582,7 @@ class browsers {
 		$data = [];
 		$path = '/goastian/midori-desktop/tags';
 		while ($path !== null) {
-			if (($html = $this->fetch('https://github.com'.$path)) !== false) {
+			if (($html = $this->fetch('https://github.com'.$path, true, $rebuild)) !== false) {
 				$obj = new \hexydec\html\htmldoc();
 				if ($obj->load($html)) {
 
@@ -614,7 +610,7 @@ class browsers {
 		return $data ?: false;
 	}
 
-	protected function renderPhp(array $data) {
+	protected function renderPhp(array $data) : string {
 		$php = [
 			'<?php',
 			'declare(strict_types=1);',
