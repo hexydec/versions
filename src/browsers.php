@@ -52,7 +52,6 @@ class browsers {
 		$added = 0;
 		$total = 0;
 		foreach ($browsers AS $key => $item) {
-			// $rebuild = $key === 'samsung';
 			if (($results = \call_user_func($item, $rebuild)) !== false) {
 				$existing = $data[$key] ?? [];
 				$new = $rebuild ? $results : \array_diff_key($results, $existing);
@@ -599,7 +598,7 @@ class browsers {
 						$date = new \DateTime($row->find('time')->attr('datetime'));
 						$data[$title] = \intval($date->format('Ymd'));
 					}
-					$path = $rebuild || true ? $obj->find('a[rel=next]')->attr('href') : null;
+					$path = $rebuild ? $obj->find('a[rel=next]')->attr('href') : null;
 				} else {
 					break;
 				}
