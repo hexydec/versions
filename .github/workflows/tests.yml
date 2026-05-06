@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Install PHP
         uses: shivammathur/setup-php@v2
@@ -21,7 +21,7 @@ jobs:
         run: echo "dir=$(composer config cache-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
             path: ${{ steps.composer-cache.outputs.dir }}
             key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
@@ -37,7 +37,7 @@ jobs:
           XDEBUG_MODE: coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v6
         with:
             files: ./coverage/result.xml
             token: ${{ secrets.CODECOV_TOKEN }}
