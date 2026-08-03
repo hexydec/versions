@@ -5,12 +5,13 @@ class browsers {
 
 	protected array $config = [
 		'msg' => null, // a callback for where the messages are written
-		'cache' => null // to cache the source content, specify the absolute cache directory
+		'cache' => null, // to cache the source content, specify the absolute cache directory
+		'githubtoken' => null // a GitHub personal access token, used to fetch full release history via the GraphQL API on rebuild
 	];
 	protected array $timing = [];
 
 	public function __construct(array $config = []) {
-		$this->config = $config;
+		$this->config = \array_replace($this->config, $config);
 	}
 
 	public function build(string $target, bool $rebuild = false) : bool {
@@ -98,9 +99,11 @@ class browsers {
 		$local = null;
 		$file = false;
 
-		// generate cache file name
+		// generate cache file name - includes a hash of the request body, as requests like the GitHub
+		// GraphQL API POST different queries (e.g. different pagination cursors) to the same URL
 		if ($cache !== null) {
-			$local = $cache.\preg_replace('/[^0-9a-z]+/i', '-', $url).'.cache';
+			$key = $url.($options['content'] ?? '');
+			$local = $cache.\preg_replace('/[^0-9a-z]+/i', '-', $url).'-'.\substr(\md5($key), 0, 8).'.cache';
 		}
 
 		// fetch from local cache
@@ -189,7 +192,7 @@ class browsers {
 		$chrome = [];
 		for ($i = 0; $i < 10; $i++) {
 			if (($data = $this->getFromJson($url.($i * $items), ['version'], ['time'], $rebuild)) !== false) {
-				$page = \array_map(fn (int $time) : int => \intval(\date('Ymd', \intval($time / 1000))), $data);
+				$page = \array_map(fn (int $time) : int => \intval(\gmdate('Ymd', \intval($time / 1000))), $data);
 				$chrome = \array_merge($chrome, $page);
 				if (\count($data) < $items || (!$rebuild && \count(\array_intersect_key($page, $existing)) > 0)) {
 					break;
@@ -670,43 +673,25 @@ class browsers {
 
 					// get next page
 					$found = false;
-					foreach ($obj->find('.pagination a') AS $item) {
-						if ($item->text() === 'Next' && ($href = $item->attr('href')) !== null) {
-							$path = $href !== $path ? $href : null;
-							$found = true;
-							break;
+					if ($rebuild) {
+						foreach ($obj->find('.pagination a') AS $item) {
+							if ($item->text() === 'Next' && ($href = $item->attr('href')) !== null) {
+								$path = $href !== $path ? $href : null;
+								$found = true;
+								break;
+							}
 						}
 					}
 					if (!$found) {
 						break;
 					}
+				} else {
+					break;
 				}
+			} else {
+				break;
 			}
 		}
 		return $data ?: false;
-	}
-
-	protected function renderPhp(array $data) : string {
-		$php = [
-			'<?php',
-			'declare(strict_types=1);',
-			'namespace hexydec\\versions;',
-			'',
-			'class versions {',
-			'',
-			"\tpublic static function get() : array {",
-			"\t\treturn ["
-		];
-		foreach ($data AS $key => $item) {
-			$php[] = "\t\t\t'".$key."' => [";
-			foreach ($item AS $version => $date) {
-				$php[] = "\t\t\t\t'".$version."' => '".$date."',";
-			}
-			$php[] = "\t\t\t],";
-		}
-		$php[] = "\t\t];";
-		$php[] = "\t}";
-		$php[] = "}";
-		return \implode("\n", $php);
 	}
 }

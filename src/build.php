@@ -13,6 +13,8 @@ if (\file_exists($envfile)) {
 // directories
 $root = \dirname(__DIR__);
 
+/** @var array<int,string> $argv PHP's CLI SAPI always registers $argv, regardless of the register_argc_argv setting */
+
 // create object
 $obj = new browsers([
 	'cache' => \in_array('--cache', $argv) ? $root.'/cache/' : null,
