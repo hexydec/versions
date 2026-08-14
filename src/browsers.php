@@ -319,10 +319,12 @@ class browsers {
 		if (($file = $this->fetch($url, true, $rebuild)) !== false && ($json = \json_decode($file)) !== null) {
 			$data = $rebuild ? $this->getLegacySafariVersions() : [];
 			foreach ($json->references AS $item) {
-				$text = $item->abstract[0]->text;
-				if (\preg_match('/([a-z]++ [0-9]{1,2}, [0-9]{4})[^0-9]++([0-9.]++) \(([0-9.]++)\)/i', $text, $match)) {
-					$date = new \DateTime($match[1]);
-					$data[$match[2]] = \intval($date->format('Ymd'));
+				if (!empty($item->abstract[0]->text)) {
+					$text = $item->abstract[0]->text;
+					if (\preg_match('/([a-z]++ [0-9]{1,2}, [0-9]{4})[^0-9]++([0-9.]++) \(([0-9.]++)\)/i', $text, $match)) {
+						$date = new \DateTime($match[1]);
+						$data[$match[2]] = \intval($date->format('Ymd'));
+					}
 				}
 			}
 			return $data;
