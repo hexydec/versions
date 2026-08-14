@@ -36,6 +36,10 @@ jobs:
         env:
           XDEBUG_MODE: coverage
 
+          # without a token the GitHub REST API allows only 60 requests an hour per IP address, which is
+          # shared between runners, so the GitHub sourced browsers are rate limited without this
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v6
         with:

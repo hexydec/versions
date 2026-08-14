@@ -3,92 +3,41 @@ declare(strict_types = 1);
 namespace hexydec\versions;
 
 /**
- * Test double for browsers that replaces every source-specific getter with a configurable stub, so
+ * Test double for browsers that replaces the result of every source with a configurable stub, so
  * build()'s merge/sort/write orchestration can be exercised without touching the network at all.
- * Any getter that isn't explicitly stubbed behaves as if the source could not be reached.
+ * Any source that isn't explicitly stubbed behaves as if it could not be reached. The sources are
+ * taken from the parent, so a browser added there needs no change here.
  */
 class browsersStub extends browsers {
 
+	/**
+	 * @var array<string,array<string,int>|false> $stub A map of browser name to the result its source should return
+	 */
 	protected array $stub = [];
 
-	public function stub(string $method, array|false $result) : static {
-		$this->stub[$method] = $result;
+	/**
+	 * Registers the result that the given browser's source should return
+	 *
+	 * @param string $browser The name of the browser to stub, as it is keyed in getSources()
+	 * @param array<string,int>|false $result The result the source should return
+	 * @return static This object, for chaining
+	 */
+	public function stub(string $browser, array|false $result) : static {
+		$this->stub[$browser] = $result;
 		return $this;
 	}
 
-	protected function result(string $method) : array|false {
-		return $this->stub[$method] ?? false;
-	}
-
-	protected function getChromeVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getFirefoxVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getEdgeVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getSafariVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getInternetExplorerVersions() : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getOperaVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getBraveVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getVivaldiVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getMaxthonVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getSamsungInternetVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getHuaweiBrowserVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getKmeleonVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getKonquerorVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getUcBrowserVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getWaterfoxVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getPalemoonVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getOculusBrowserVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
-	}
-
-	protected function getMidoriVersions(bool $rebuild = false) : array|false {
-		return $this->result(__FUNCTION__);
+	/**
+	 * Replaces each of the parent's sources with a callback returning its stubbed result
+	 *
+	 * @param array<string,array<string,int>> $data The versions collected so far, which the stub has no use for
+	 * @return array<string,callable> An array of browser name to the callback that returns its stubbed result
+	 */
+	protected function getSources(array $data) : array {
+		$sources = [];
+		foreach (\array_keys(parent::getSources($data)) AS $browser) {
+			$sources[$browser] = fn (bool $rebuild) : array|false => $this->stub[$browser] ?? false;
+		}
+		return $sources;
 	}
 }
