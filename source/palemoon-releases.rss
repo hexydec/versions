@@ -3,7 +3,113 @@
     <title>Releases for MoonchildProductions/Pale-Moon</title>
     <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/release</link>
     <description></description>
-    <pubDate>Tue, 05 May 2026 23:33:44 +0000</pubDate>
+    <pubDate>Mon, 03 Aug 2026 14:24:59 +0000</pubDate>
+    <item>
+      <title>Pale Moon 34.3.1</title>
+      <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.3.1_Release</link>
+      <description></description>
+      <content:encoded><![CDATA[<p dir="auto">This a security and bugfix release.</p>
+<p dir="auto"><strong>Changes/fixes:</strong></p>
+<ul dir="auto">
+<li>Pale Moon will now exclude local resources from  CSP checks, aligning it with the rest of CSP handling.</li>
+<li>Fixed an issue where the devtools JSON viewer would, in some cases, make erroneous requests to remote servers.</li>
+<li>Updated libpng to 1.6.58+apng.</li>
+<li>Updated NSS to 3.90.12 (UXP), addressing multiple security issues.</li>
+<li>Fixed several intermittent and rare crashes.</li>
+<li>Security issues addressed: CVE-2026-12318 (CWE-125), CVE-2026-12322, CVE-2026-12292 (DiD), and multiple other issues that did not have a CVE designation at the time of patching.</li>
+</ul>
+]]></content:encoded>
+      <author>Moonchild</author>
+      <guid>120804: https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.3.1_Release</guid>
+      <pubDate>Tue, 23 Jun 2026 08:29:05 +0000</pubDate>
+    </item>
+    <item>
+      <title>Pale Moon 34.3.0.1</title>
+      <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.3.0.1_Release</link>
+      <description></description>
+      <content:encoded><![CDATA[<p dir="auto">This is a small update to address 2 important usability/stability issues.</p>
+<p dir="auto"><strong>Changes/fixes:</strong></p>
+<ul dir="auto">
+<li>Fixed intermittent JavaScript engine crashes due to the newly-implemented <code>FinalizationRegistry</code> code.</li>
+<li>Fixed a webaudio channel mixing regression resulting in broken audio.</li>
+</ul>
+]]></content:encoded>
+      <author>Moonchild</author>
+      <guid>120785: https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.3.0.1_Release</guid>
+      <pubDate>Tue, 09 Jun 2026 16:24:46 +0000</pubDate>
+    </item>
+    <item>
+      <title>Pale Moon 34.3.0</title>
+      <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.3.0_Release</link>
+      <description></description>
+      <content:encoded><![CDATA[<p dir="auto">This is a major development, bugfix and security release.<br/>
+Special thanks to all the contributors (you know who you are!) for major work done on the platform internals this cycle, making Pale Moon better than ever :)</p>
+<p dir="auto"><strong>New features:</strong></p>
+<ul dir="auto">
+<li>Added powerPreference to canvas WebGL context for web compatibility.</li>
+<li>Implemented support for the <code>lch</code> color space in CSS.</li>
+<li>Added a base implementation for CSS stylesheet constructors.</li>
+<li>Added a base implementation for CSS <code>aspect-ratio</code> sizing.</li>
+<li>Added support for CSS <code>min()</code>, <code>max()</code> and <code>clamp()</code> functions.</li>
+<li>Added support for CSS logical border radius properties.</li>
+<li>Added support for ranges in CSS media queries.</li>
+<li>Added support for CSS shadow parts.</li>
+<li>Added support for degenerate CSS values <code>infinity</code>, <code>-infinity</code> and <code>NaN</code>.</li>
+<li>Implemented full LoongArch64 Baseline/Ion/WASM JIT compiler support.</li>
+<li>Added AV1 decoding with Dav1d for more performant AV1 video playback on 64-bit builds. See implementation notes.<br/>
+Note: AV1 is now enabled by default on Dav1d-supported configurations.</li>
+<li>Added ES2024 Arraybuffer transfer APIs (<code>resize</code>, <code>transfer</code>, <code>transferToFixedLength</code>, <code>detached</code>, <code>maxByteLength</code> and <code>resizable</code>).</li>
+<li>Added support for growable/resizable SharedArrayBuffers and DataViews.</li>
+<li>Added ES2024 grouping builtins (map <code>.groupBy</code>).</li>
+<li>Added ES2024 resolver builtins (<code>.withResolvers()</code>).</li>
+<li>Added ES2024 String well-formed functions (<code>.isWellFormed()</code> and <code>.toWellFormed()</code>).</li>
+<li>Added support for symbols as weak collection keys.</li>
+<li>Added support for <code>Atomics.waitAsync</code>.</li>
+<li>Added support for <code>FinalizationRegistry</code> (part of the <code>WeakRef</code> spec).</li>
+</ul>
+<p dir="auto"><strong>Changes/fixes:</strong></p>
+<ul dir="auto">
+<li>Switched our build system to Python 3. See implementation notes.</li>
+<li>Linux: removed <code>dbus-glib</code> dependency.</li>
+<li>Linux: Added EGL as a preferred OpenGL provider with GLX fallback; GLX remains the configured default as there are still some unresolved issues with EGL.</li>
+<li>Improved JS performance by porting across various enhancements from Mozilla.</li>
+<li>Fixed various application crashes.</li>
+<li>Further improved compatibility with building for Loongson architectures.</li>
+<li>Further improved hardware accelerated decoding of WMF videos.</li>
+<li>Fixed ARM assembler issues in the Goanna back-end.</li>
+<li>Improved parallel JS parsing tasks.</li>
+<li>Improved CSS handling of <code>calc()</code> for web compatibility, allowing it in many more places (e.g. <code>color()</code> and <code>z-index</code>).<br/>
+For compatibility and performance reasons, we still strongly recommend that you use CSS variables to make calculations where possible.</li>
+<li>Ported several smaller performance improvements from the Dactyloidae project.</li>
+<li>Aligned CSS border width calculations with mainstream, for web compatibility. Please note that this may impact some themes that might rely on fractional border rounding (instead of truncation).</li>
+<li>Removed the CloudFlare workaround introduced in 34.2.0 as it should no longer be necessary with general image size handling improvements. The preference will no longer do anything.</li>
+<li>White-listed driver vendors for VMWare, VirtualBox, VirtIO and Parallels to allow hardware accelleration as much as possible in VM environments.</li>
+<li>Changed the implementation of <code>WeakRef</code> support to be always enabled in its full implementation.</li>
+<li>Fixed some build issues on NetBSD.</li>
+<li>Mac: Fixed a pertinent crash due to font handling on OS X 10.7 through 10.11.</li>
+<li>Mac: Fixed build compatibility with 32-bit MacOS and Mac on PowerPC hardware.</li>
+<li>Fixed a devtools crash on Big Endian machines.</li>
+<li>Fixed an issue causing rendering artifacts on excessively large <code>border-radius</code> values (e.g. Tailwind CSS).</li>
+</ul>
+<p dir="auto"><strong>Security fixes:</strong></p>
+<ul dir="auto">
+<li>Fixed a stack corruption issue in nsLocaleService that could lead to crashes.</li>
+<li>Implemented some ANGLE upstream fixes.</li>
+<li>Updated NSS to 3.90.11 (UXP), picking up a number of upstream security fixes.</li>
+<li>Another large security audit was performed of 190 security-sensitive reported bugs. Many security issues were addressed, including potential crash scenarios and code correctness issues.<br/>
+As a summary: 18 potential vulnerabilities were found applicable and fixed, another 18 issues had DiD code changes applied, and 4 were already mitigated by us before being reported. Of the reported security bugs, 150 were not applicable to our code (with a good portion once again pertaining to e10s/multi-process browser architectures).</li>
+</ul>
+<p dir="auto"><strong>Implementation notes:</strong></p>
+<ul dir="auto">
+<li>The Dav1d AV1 video library was added to Pale Moon, which allows for greatly better performance in AV1 video playback, especially at higher resolutions. The codec is still very computationally intensive, so this does rely pretty heavily on having modern, capable hardware.<br/>
+As an additional note, this library requires AVX hardware to properly decode at speed, and is only fully compatible with 64-bit targets. 32-bit builds will continue to use the reference AOM library for AV1 playback. If you build from source, there is a new configure option <code>--enable-libaom</code> to build with the reference library instead of Dav1d.</li>
+<li>If you build from source yourself, you will no longer have to rely on a distribution that offers Python 2.7. Please note there is some variance in Python 3 versions and not every version will work due to feature changes within the Python 3 range. Versions 3.4 through 3.14 should work; YMMV on other versions. Please ask for help on the <a href="https://forum.palemoon.org" rel="nofollow">forum</a> if you can&#39;t figure it out.</li>
+</ul>
+]]></content:encoded>
+      <author>Moonchild</author>
+      <guid>120781: https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.3.0_Release</guid>
+      <pubDate>Tue, 02 Jun 2026 13:30:48 +0000</pubDate>
+    </item>
     <item>
       <title>Pale Moon 34.2.2</title>
       <link>https://repo.palemoon.org/MoonchildProductions/Pale-Moon/releases/tag/34.2.2_Release</link>
@@ -114,7 +220,7 @@ This was previously backed out due to intermittent issues and crashes.</li>
 <li>Pale Moon, from this version forward, allows unencrypted websocket connections to localhost addresses even when the calling document was served encrypted.</li>
 <li>Fixed an issue in the new Cascade Layers implementation causing problems with UI elements and extensions.</li>
 <li>Fixed several issues with the new ICU library implementation in UXP:
-<ul dir="auto">
+<ul>
 <li>Fixed an issue where it was returning unexpected Unicode spaces in date strings instead of standard space characters, causing problems with web scripting.</li>
 <li>Fixed an issue with plural forms for Shuar, Welsh and several Slavic languages.</li>
 <li>Fixed an issue with letter dots in Lithuanian.</li>
@@ -398,7 +504,7 @@ Release notes: see the main 33.8.0 release.</p>
 <li>Improved desktop ARM media capabilities.</li>
 <li>Improved our handling of CSP checks (multiple improvements surrounding loading principal checks).</li>
 <li>Added several Mac-specific file types to be treated as executables.</li>
-<li>Updated the emoji font to Unicode 16.0.0. We can now finally have the &#34;tired dev&#34; emoji 🫩!</li>
+<li>Updated the emoji font to Unicode 16.0.0. We can now finally have the &#34;tired dev&#34; emoji <span class="emoji" aria-label="face with bags under eyes">🫩</span>!</li>
 <li>Updated SQLite library to 3.50.1.</li>
 <li>Updated NSS to 3.90.7.1 to fix some issues with some sites due to prior root certificate updates.</li>
 <li>Updated code dealing with internal URL rewrites for Youtube.</li>
@@ -689,7 +795,7 @@ Note: if you are running Windows 10 before build 2004 (before 20H1), this check 
 </li>
 <li>
 <p dir="auto">By user request, primarily for advanced power users who need this for their local setups, 2 new preferences were introduced to control how the browser deals with same-origin and CORS.</p>
-<ul dir="auto">
+<ul>
 <li><code>security.same_origin_policy.enabled</code>, when set to <code>false</code>, will completely disable checking if scripts are allowed to be loaded based on the same-origin policy. Security warning: this is a really bad idea on the open web and you should never blanket disable the Same-Origin Policy check in a web browser for normal use.</li>
 <li><code>content.cors.bypass_preflight_request</code>, when set to <code>true</code>, will no longer send CORS preflight requests or check preflight responses and always allow cross-origin requests. Note that this kind of request is normally only made if sending a request to a server might result in data changes server-side (e.g. <code>POST</code>). This preference only does something when CORS is already disabled; provided primarily for specific corner cases where CORS is disabled and preflight checks (providing an extra safety net for server data) need to be shut off too.</li>
 </ul>
@@ -747,7 +853,7 @@ Note: if you are running Windows 10 before build 2004 (before 20H1), this check 
 <li>Updated NSS to 3.90.4.</li>
 <li>Updated our emoji font to 15.1.2 (Unicode 15.1 with some additional extras/updates).</li>
 <li>Code cleanup:
-<ul dir="auto">
+<ul>
 <li>Removed unused code related to the (incomplete) FoxEye experiment.</li>
 <li>Removed support code for LibAV and (very) old versions of FFmpeg. We require libavcodec 58 or later (FFmpeg 4.0+) from this version forward (Linux).</li>
 <li>Removed click event dispatching code that is no longer relevant.</li>
@@ -1146,7 +1252,7 @@ If you desire the intended behavior, please use an extension instead.</li>
 <li>Added the (hidden) preference <code>browser.history.menuMaxResults</code> to allow users to control how many history entries are listed in the menu. Setting this to <code>0</code> will hide history menu entries altogether, and any positive number configures how many entries the entries are limited to. The default if not defined is 15.</li>
 <li>Switched C++ language level used to C++14 on all platforms.</li>
 <li>Web compatibility and scripting improvements:
-<ul dir="auto">
+<ul>
 <li>Implemented geometry <code>.from*</code> static constructors for web compatibility.</li>
 <li>Implemented partial support for CSS <code>calc()</code> in color keywords.</li>
 <li>Implemented Array &#34;find from last&#34; feature (<code>findLast</code> and <code>findLastIndex</code>).</li>
@@ -1868,7 +1974,7 @@ In the future we <em>may</em> add an &#34;automatic&#34; option similar to other
 <p dir="auto"><strong>New features:</strong></p>
 <ul dir="auto">
 <li>Language packs for the following newly-supported languages:
-<ul dir="auto">
+<ul>
 <li>Arabic (ar)</li>
 <li>Chinese Traditional (zh-TW)</li>
 <li>Croatian (hr)</li>
@@ -2879,7 +2985,7 @@ Please note that the identity panel will always be able to help you on secure si
 <p dir="auto"><strong>Changes/fixes:</strong></p>
 <ul dir="auto">
 <li>User interface:
-<ul dir="auto">
+<ul>
 <li>Added a menu option to restart the browser.</li>
 <li>Added Windows-specific CSS parameters and queries for the use of the system accent color. Added are parameters -moz-win-accentcolor and -moz-win-accentcolortext, and the media query -moz-win-accentcolor-applies to know if Windows is actively using an accent color.</li>
 <li>Changed Windows&#39; browser CSS sheet ot use variables instead of hard-coding colors, simplifying its style and making it more flexible. Further cleaned up the Windows 10 specific browser style.</li>
@@ -2894,7 +3000,7 @@ Please note that the identity panel will always be able to help you on secure si
 </ul>
 </li>
 <li>Media:
-<ul dir="auto">
+<ul>
 <li>MSE Media updates (ongoing). We are focusing on improving MP4 handling.</li>
 <li>Improved MP3 metadata parsing (e.g. incorrect duration with embedded album cover)</li>
 <li>Fixed a number of searching issues in MP3 files</li>
@@ -2999,7 +3105,7 @@ Handshakes should be considerably faster now and no longer stall in the wrong ci
 <ul dir="auto">
 <li>Completely re-worked the Media Source Extensions code to make it spec compliant, and asynchronous as per specification for MSE with MP4. This should fix playback problems on YouTube, Twitch, Vimeo and other sites that previously had some issues. A massive thank you to Travis for his tireless work on making this happen!<br/>
 Please note that MSE+WebM (disabled by default) is not using this new code yet (planned for the next release), and as such there is a temporary set of things to keep in mind if you don&#39;t use default settings:
-<ul dir="auto">
+<ul>
 <li>If you have previously enabled MSE+WebM, this setting will be reset when you update to avoid conflicting settings with the updated MSE code.</li>
 <li>We&#39;ve added an extra setting in Options to disable the updated MSE code (asynchronous use) in case you need to use WebM or are otherwise having issues with the updated code (please let us know in that case).</li>
 <li>Once again, the MSE+WebM and Asynchronous MSE use are currently mutually exclusive. You can have one or the other, not both, until we sort out the code for WebM. To enable MSE+WebM you will first have to disable Asynchronouse MSE in settings (otherwise the WebM setting will be greyed out and disabled).</li>

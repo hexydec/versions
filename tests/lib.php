@@ -60,6 +60,18 @@ class browsersPublic extends browsers {
 		return parent::getUcBrowserVersions($rebuild);
 	}
 
+	public function getSilkBrowserVersions(bool $rebuild = false) : array|false {
+		return parent::getSilkBrowserVersions($rebuild);
+	}
+
+	public function getKiwiBrowserVersions(bool $rebuild = false) : array|false {
+		return parent::getKiwiBrowserVersions($rebuild);
+	}
+
+	public function getDuckDuckBrowserVersions(bool $rebuild = false) : array|false {
+		return parent::getDuckDuckBrowserVersions($rebuild);
+	}
+
 	public function getKmeleonVersions(bool $rebuild = false) : array|false {
 		return parent::getKmeleonVersions($rebuild);
 	}

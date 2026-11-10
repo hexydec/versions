@@ -4,17 +4,31 @@ declare(strict_types = 1);
 final class browsersTest extends \PHPUnit\Framework\TestCase {
 
 	protected function getBrowsers() : browsersPublic {
-		return new browsersPublic(['cache' => \dirname(__DIR__).'/cache/']);
+		return new browsersPublic([
+			'cache' => \dirname(__DIR__).'/cache/',
+
+			// without a token the GitHub REST API allows only 60 requests an hour per IP address, which
+			// the GitHub sourced browsers exhaust, so use the GraphQL API when a token is available
+			'githubtoken' => $_ENV['GITHUB_TOKEN'] ?? \getenv('GITHUB_TOKEN') ?: null
+		]);
 	}
 
 	protected function assertVersionArray(array|false $result, string $browser) : void {
 		$this->assertIsArray($result, $browser.' should return an array');
 		$this->assertNotEmpty($result, $browser.' should not be empty');
 		foreach ($result AS $version => $date) {
-			$this->assertIsString((string) $version, $browser.' version keys should be strings');
+			$this->assertMatchesRegularExpression('/^[0-9]+(?:\.[0-9]+)*(?:-[0-9a-z_.]+)?$/i', (string) $version, $browser.' version keys should be version numbers, optionally with a build suffix');
 			$this->assertIsInt($date, $browser.' dates should be integers');
 			$this->assertGreaterThan(19000101, $date, $browser.' dates should be valid YYYYMMDD integers');
 			$this->assertLessThan(99991231, $date, $browser.' dates should be valid YYYYMMDD integers');
+		}
+	}
+
+	protected function assertVersionArrayOrSkip(array|false $result, string $browser) : void {
+		if ($result === false) {
+			$this->markTestSkipped($browser.' source is behind bot detection, which blocks requests from datacentre IP addresses such as CI runners');
+		} else {
+			$this->assertVersionArray($result, $browser);
 		}
 	}
 
@@ -73,11 +87,23 @@ final class browsersTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testHuaweiBrowserVersions() : void {
-		$this->assertVersionArray($this->getBrowsers()->getHuaweiBrowserVersions(), 'Huawei Browser');
+		$this->assertVersionArrayOrSkip($this->getBrowsers()->getHuaweiBrowserVersions(), 'Huawei Browser');
 	}
 
 	public function testUcBrowserVersions() : void {
-		$this->assertVersionArray($this->getBrowsers()->getUcBrowserVersions(), 'UC Browser');
+		$this->assertVersionArrayOrSkip($this->getBrowsers()->getUcBrowserVersions(), 'UC Browser');
+	}
+
+	public function testSilkBrowserVersions() : void {
+		$this->assertVersionArrayOrSkip($this->getBrowsers()->getSilkBrowserVersions(), 'Silk Browser');
+	}
+
+	public function testKiwiBrowserVersions() : void {
+		$this->assertVersionArrayOrSkip($this->getBrowsers()->getKiwiBrowserVersions(), 'Kiwi Browser');
+	}
+
+	public function testDuckDuckBrowserVersions() : void {
+		$this->assertVersionArrayOrSkip($this->getBrowsers()->getDuckDuckBrowserVersions(), 'DuckDuckGo Browser');
 	}
 
 	public function testKmeleonVersions() : void {
@@ -93,11 +119,7 @@ final class browsersTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testPalemoonVersions() : void {
-		$result = $this->getBrowsers()->getPalemoonVersions();
-		if ($result === false) {
-			$this->markTestSkipped('Pale Moon RSS is behind bot detection');
-		}
-		$this->assertVersionArray($result, 'Pale Moon');
+		$this->assertVersionArrayOrSkip($this->getBrowsers()->getPalemoonVersions(), 'Pale Moon');
 	}
 
 	public function testOculusBrowserVersions() : void {
@@ -115,12 +137,16 @@ final class browsersTest extends \PHPUnit\Framework\TestCase {
 			$this->assertTrue($browsers->build($target));
 			$data = \json_decode((string) \file_get_contents($target), true);
 			$this->assertIsArray($data);
-			foreach (['chrome', 'firefox', 'edge', 'safari', 'ie', 'opera', 'brave', 'vivaldi', 'maxthon', 'samsung', 'huawei', 'ucbrowser', 'waterfox', 'oculus', 'midori', 'konqueror', 'kmeleon'] AS $key) {
+			foreach (['chrome', 'firefox', 'edge', 'safari', 'ie', 'opera', 'brave', 'vivaldi', 'maxthon', 'samsung', 'waterfox', 'oculus', 'midori', 'konqueror', 'kmeleon'] AS $key) {
 				$this->assertArrayHasKey($key, $data, "Expected browser '$key' in output");
 				$this->assertNotEmpty($data[$key], "Browser '$key' should have versions");
 			}
-			if (isset($data['palemoon'])) { // may be absent when RSS is behind bot detection
-				$this->assertNotEmpty($data['palemoon'], "Browser 'palemoon' should have versions");
+
+			// these sources are behind bot detection or rate limited, so may be absent when built from a datacentre IP address such as a CI runner
+			foreach (['palemoon', 'huawei', 'ucbrowser', 'silk', 'kiwi', 'duckduckgo'] AS $key) {
+				if (isset($data[$key])) {
+					$this->assertNotEmpty($data[$key], "Browser '$key' should have versions");
+				}
 			}
 		} finally {
 			if (\file_exists($target)) {
