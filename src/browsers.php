@@ -100,7 +100,8 @@ class browsers {
 
 		// generate cache file name
 		if ($cache !== null) {
-			$local = $cache.\preg_replace('/[^0-9a-z]+/i', '-', $url).'.cache';
+			$suffix = isset($options['content']) ? '-'.\md5($options['content']) : '';
+			$local = $cache.\preg_replace('/[^0-9a-z]+/i', '-', $url).$suffix.'.cache';
 		}
 
 		// fetch from local cache
@@ -455,7 +456,7 @@ class browsers {
 				$url = 'https://api.github.com/repos/'.$user.'/'.$repo.'/releases?per_page=100&page='.$page;
 				if (($file = $this->fetch($url, true, $rebuild)) !== false && ($json = \json_decode($file)) !== null && \is_array($json) && $json !== []) {
 					foreach ($json AS $item) {
-						if (\str_starts_with($item->name, 'Release ')) {
+						if ($filter === null || \str_starts_with($item->name, $filter)) {
 							$data[\ltrim($item->tag_name, 'v')] = \intval((new \DateTime($item->published_at))->format('Ymd'));
 						}
 					}
@@ -655,35 +656,7 @@ class browsers {
 	}
 
 	protected function getMidoriVersions(bool $rebuild = false) : array|false {
-		$data = [];
-		$path = '/goastian/midori-desktop/tags';
-		while ($path !== null) {
-			if (($html = $this->fetch('https://github.com'.$path, true, $rebuild)) !== false) {
-				$obj = new \hexydec\html\htmldoc();
-				if ($obj->load($html)) {
-
-					// extract versions
-					foreach ($obj->find('.Box-row') AS $row) {
-						$date = new \DateTime($row->find('relative-time')->text());
-						$data[\ltrim($row->find('.Link--primary')->text(), 'v')] = \intval($date->format('Ymd'));
-					}
-
-					// get next page
-					$found = false;
-					foreach ($obj->find('.pagination a') AS $item) {
-						if ($item->text() === 'Next' && ($href = $item->attr('href')) !== null) {
-							$path = $href !== $path ? $href : null;
-							$found = true;
-							break;
-						}
-					}
-					if (!$found) {
-						break;
-					}
-				}
-			}
-		}
-		return $data ?: false;
+		return $this->getGithubReleases('goastian', 'midori-desktop', 'v', $rebuild);
 	}
 
 	protected function renderPhp(array $data) : string {
