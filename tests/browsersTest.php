@@ -117,7 +117,7 @@ final class browsersTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testKonquerorVersions() : void {
-		$this->assertVersionArray($this->getBrowsers()->getKonquerorVersions(), 'Konqueror');
+		$this->assertVersionArrayOrSkip($this->getBrowsers()->getKonquerorVersions(), 'Konqueror');
 	}
 
 	public function testWaterfoxVersions() : void {
@@ -147,13 +147,13 @@ final class browsersTest extends \PHPUnit\Framework\TestCase {
 			$this->assertTrue($browsers->build($target));
 			$data = \json_decode((string) \file_get_contents($target), true);
 			$this->assertIsArray($data);
-			foreach (['chrome', 'firefox', 'edge', 'safari', 'ie', 'opera', 'brave', 'vivaldi', 'maxthon', 'samsung', 'waterfox', 'oculus', 'midori', 'konqueror', 'kmeleon', 'dillo'] AS $key) {
+			foreach (['chrome', 'firefox', 'edge', 'safari', 'ie', 'opera', 'brave', 'vivaldi', 'maxthon', 'samsung', 'waterfox', 'oculus', 'midori', 'kmeleon', 'dillo'] AS $key) {
 				$this->assertArrayHasKey($key, $data, "Expected browser '$key' in output");
 				$this->assertNotEmpty($data[$key], "Browser '$key' should have versions");
 			}
 
 			// these sources are behind bot detection or rate limited, so may be absent when built from a datacentre IP address such as a CI runner
-			foreach (['palemoon', 'huawei', 'ucbrowser', 'silk', 'kiwi', 'duckduckgo'] AS $key) {
+			foreach (['palemoon', 'huawei', 'ucbrowser', 'silk', 'kiwi', 'duckduckgo', 'konqueror'] AS $key) {
 				if (isset($data[$key])) {
 					$this->assertNotEmpty($data[$key], "Browser '$key' should have versions");
 				}
