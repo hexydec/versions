@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3b93e73a1f9c45882553219f7723bc11",
+    "content-hash": "41c818bed0058bc4e086a8df78fbe36a",
     "packages": [
         {
             "name": "hexydec/cssdoc",
@@ -63,16 +63,16 @@
         },
         {
             "name": "hexydec/htmldoc",
-            "version": "1.8.9",
+            "version": "1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/htmldoc.git",
-                "reference": "822f781df0a54bc03215748a5b24f6f476566c82"
+                "reference": "0b0eaa07f65e7ff7cebcb4e779df603b875fac38"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/htmldoc/zipball/822f781df0a54bc03215748a5b24f6f476566c82",
-                "reference": "822f781df0a54bc03215748a5b24f6f476566c82",
+                "url": "https://api.github.com/repos/hexydec/htmldoc/zipball/0b0eaa07f65e7ff7cebcb4e779df603b875fac38",
+                "reference": "0b0eaa07f65e7ff7cebcb4e779df603b875fac38",
                 "shasum": ""
             },
             "require": {
@@ -119,9 +119,9 @@
             ],
             "support": {
                 "issues": "https://github.com/hexydec/htmldoc/issues",
-                "source": "https://github.com/hexydec/htmldoc/tree/1.8.9"
+                "source": "https://github.com/hexydec/htmldoc/tree/1.9.0"
             },
-            "time": "2026-05-04T19:27:26+00:00"
+            "time": "2026-11-10T21:00:34+00:00"
         },
         {
             "name": "hexydec/jslite",
