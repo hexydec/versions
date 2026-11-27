@@ -56,7 +56,8 @@ class browsers {
 			'waterfox' => [$this, 'getWaterfoxVersions'],
 			'palemoon' => [$this, 'getPalemoonVersions'],
 			'oculus' => [$this, 'getOculusBrowserVersions'],
-			'midori' => [$this, 'getMidoriVersions']
+			'midori' => [$this, 'getMidoriVersions'],
+			'dillo' => [$this, 'getDilloVersions']
 		];
 	}
 
@@ -901,5 +902,26 @@ class browsers {
 	 */
 	protected function getMidoriVersions(bool $rebuild = false) : array|false {
 		return $this->getGithubReleases('goastian', 'midori-desktop', 'v', $rebuild);
+	}
+
+	/**
+	 * Retrieves the Dillo versions from the tags feed on their cgit server
+	 *
+	 * @param bool $rebuild Whether to bypass the local cache and fetch the feed again
+	 * @return array<string,int>|false An array of versions mapped to their release date as an integer in the format Ymd, or false if no versions could be retrieved
+	 */
+	protected function getDilloVersions(bool $rebuild = false) : array|false {
+		$data = [];
+		$url = 'https://git.dillo-browser.org/dillo/tags.xml';
+		if (($xml = $this->fetch($url, true, $rebuild)) !== false && ($obj = \simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOERROR | LIBXML_NOWARNING)) !== false) {
+
+			// tags are named "[v3.3.0]" or "[release-3_0_4_1]", so release candidates and other tags don't match
+			foreach ($obj->entry AS $item) {
+				if (\preg_match('/^\[(?:v|release-)([0-9]++(?:[._][0-9]++)*+)\]/', (string) $item->title, $match)) {
+					$data[\str_replace('_', '.', $match[1])] = \intval((new \DateTime((string) $item->published))->format('Ymd'));
+				}
+			}
+		}
+		return $data ?: false;
 	}
 }

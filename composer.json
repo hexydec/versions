@@ -23,6 +23,10 @@
     },
     "scripts": {
         "test": "phpunit",
-        "analyse": "phpstan analyse --memory-limit=512M"
+        "analyse": "@php -d opcache.enable_cli=0 vendor/bin/phpstan analyse --memory-limit=512M",
+        "build": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php -d xdebug.mode=off src/build.php"
+        ]
     }
 }

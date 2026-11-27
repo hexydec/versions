@@ -1,6 +1,12 @@
 <?php
 declare(strict_types = 1);
 
+// load local environment variables if present
+$envfile = \dirname(__DIR__).'/env.php';
+if (\file_exists($envfile)) {
+	require $envfile;
+}
+
 final class browsersTest extends \PHPUnit\Framework\TestCase {
 
 	protected function getBrowsers() : browsersPublic {
@@ -111,7 +117,7 @@ final class browsersTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testKonquerorVersions() : void {
-		$this->assertVersionArray($this->getBrowsers()->getKonquerorVersions(), 'Konqueror');
+		$this->assertVersionArrayOrSkip($this->getBrowsers()->getKonquerorVersions(), 'Konqueror');
 	}
 
 	public function testWaterfoxVersions() : void {
@@ -130,6 +136,10 @@ final class browsersTest extends \PHPUnit\Framework\TestCase {
 		$this->assertVersionArray($this->getBrowsers()->getMidoriVersions(), 'Midori');
 	}
 
+	public function testDilloVersions() : void {
+		$this->assertVersionArray($this->getBrowsers()->getDilloVersions(), 'Dillo');
+	}
+
 	public function testBuildFresh() : void {
 		$target = \sys_get_temp_dir().'/versions-test-'.uniqid().'.json';
 		try {
@@ -137,13 +147,13 @@ final class browsersTest extends \PHPUnit\Framework\TestCase {
 			$this->assertTrue($browsers->build($target));
 			$data = \json_decode((string) \file_get_contents($target), true);
 			$this->assertIsArray($data);
-			foreach (['chrome', 'firefox', 'edge', 'safari', 'ie', 'opera', 'brave', 'vivaldi', 'maxthon', 'samsung', 'waterfox', 'oculus', 'midori', 'konqueror', 'kmeleon'] AS $key) {
+			foreach (['chrome', 'firefox', 'edge', 'safari', 'ie', 'opera', 'brave', 'vivaldi', 'maxthon', 'samsung', 'waterfox', 'oculus', 'midori', 'kmeleon', 'dillo'] AS $key) {
 				$this->assertArrayHasKey($key, $data, "Expected browser '$key' in output");
 				$this->assertNotEmpty($data[$key], "Browser '$key' should have versions");
 			}
 
 			// these sources are behind bot detection or rate limited, so may be absent when built from a datacentre IP address such as a CI runner
-			foreach (['palemoon', 'huawei', 'ucbrowser', 'silk', 'kiwi', 'duckduckgo'] AS $key) {
+			foreach (['palemoon', 'huawei', 'ucbrowser', 'silk', 'kiwi', 'duckduckgo', 'konqueror'] AS $key) {
 				if (isset($data[$key])) {
 					$this->assertNotEmpty($data[$key], "Browser '$key' should have versions");
 				}

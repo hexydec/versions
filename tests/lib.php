@@ -95,4 +95,8 @@ class browsersPublic extends browsers {
 	public function getMidoriVersions(bool $rebuild = false) : array|false {
 		return parent::getMidoriVersions($rebuild);
 	}
+
+	public function getDilloVersions(bool $rebuild = false) : array|false {
+		return parent::getDilloVersions($rebuild);
+	}
 }
