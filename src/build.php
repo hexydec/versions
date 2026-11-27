@@ -13,11 +13,9 @@ if (\file_exists($envfile)) {
 // directories
 $root = \dirname(__DIR__);
 
-/** @var array<int,string> $argv PHP's CLI SAPI always registers $argv, regardless of the register_argc_argv setting */
-
 // create object
 $obj = new browsers([
-	'cache' => \in_array('--cache', $argv) ? $root.'/cache/' : null,
+	'cache' => \in_array('--cache', $_SERVER['argv']) ? $root.'/cache/' : null,
 	'githubtoken' => $_ENV['GITHUB_TOKEN'] ?? \getenv('GITHUB_TOKEN') ?: null
 ]);
-$obj->build($root.'/dist/versions.json', \in_array('--rebuild', $argv));
+$obj->build($root.'/dist/versions.json', \in_array('--rebuild', $_SERVER['argv']));
