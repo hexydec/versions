@@ -15,7 +15,7 @@
     "minimum-stability": "beta",
     "require": {
         "php": ">=8.4",
-        "hexydec/htmldoc": "1.8.9"
+        "hexydec/htmldoc": "1.9.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^13.0",

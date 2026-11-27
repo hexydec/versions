@@ -901,43 +901,7 @@ class browsers {
 	 * @return array<string,int>|false An array of versions mapped to their release date as an integer in the format Ymd, or false if no versions could be retrieved
 	 */
 	protected function getMidoriVersions(bool $rebuild = false) : array|false {
-		$data = [];
-		$path = '/goastian/midori-desktop/tags';
-		while ($path !== null) {
-			if (($html = $this->fetch('https://github.com'.$path, true, $rebuild)) !== false) {
-				$obj = new \hexydec\html\htmldoc();
-				if ($obj->load($html)) {
-
-					// extract versions
-					foreach ($obj->find('.Box-row') AS $row) {
-						$version = \ltrim($row->find('.Link--primary')->text(), 'v');
-						if ($version !== '' && ($date = $row->find('relative-time')->text()) !== '') {
-							$data[$version] = \intval((new \DateTime($date))->format('Ymd'));
-						}
-					}
-
-					// get next page
-					$found = false;
-					if ($rebuild) {
-						foreach ($obj->find('.pagination a') AS $item) {
-							if ($item->text() === 'Next' && ($href = $item->attr('href')) !== null) {
-								$path = $href !== $path ? $href : null;
-								$found = true;
-								break;
-							}
-						}
-					}
-					if (!$found) {
-						break;
-					}
-				} else {
-					break;
-				}
-			} else {
-				break;
-			}
-		}
-		return $data ?: false;
+		return $this->getGithubReleases('goastian', 'midori-desktop', 'v', $rebuild);
 	}
 
 	/**
